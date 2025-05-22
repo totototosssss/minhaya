@@ -11,14 +11,15 @@ document.addEventListener('DOMContentLoaded', () => {
         errorMessage: document.getElementById('errorMessage'),
         quizEndMessage: document.getElementById('quizEndMessage'),
         quizArea: document.getElementById('quizArea'),
-        resultArea: document.getElementById('resultArea')
+        resultArea: document.getElementById('resultArea'),
+        correctRateText: document.getElementById('correctRateText') // 正答率表示用
     };
 
     // --- Configuration ---
     const CSV_FILE_PATH = 'みんはや問題リストv1.27 - 問題リスト.csv';
     /**
      * IMPORTANT: Adjust these column indices (0-based) to match your CSV file.
-     * Based on the header "問題答え読み最終確認日":
+     * Based on the header "問題答え読み最終確認日" (assumed):
      * Column 1 (問題) -> QUESTION: 0
      * Column 2 (答え) -> DISPLAY_ANSWER: 1
      * Column 3 (読み) -> READING_ANSWER: 2
@@ -32,6 +33,8 @@ document.addEventListener('DOMContentLoaded', () => {
     let quizzes = [];
     let currentQuestionIndex = 0;
     let totalQuestions = 0;
+    let correctAnswers = 0;
+    let questionsAttempted = 0;
 
     function shuffleArray(array) {
         for (let i = array.length - 1; i > 0; i--) {
@@ -45,42 +48,45 @@ document.addEventListener('DOMContentLoaded', () => {
             ui.loadingMessage.style.display = 'block';
             ui.errorMessage.style.display = 'none';
             ui.quizArea.style.display = 'none';
+            ui.correctRateText.textContent = '正答率: ---'; // 初期表示
 
             const response = await fetch(CSV_FILE_PATH);
             if (!response.ok) throw new Error(`CSVファイル読み込みエラー (${response.status}, ${response.statusText})`);
             
             let csvText = await response.text();
-            // Remove BOM (Byte Order Mark) if present (especially for UTF-8 CSVs from Excel)
+            // Remove BOM (Byte Order Mark) if present
             if (csvText.startsWith('\uFEFF')) csvText = csvText.substring(1);
 
-            const lines = csvText.trim().split(/\r?\n/); // Handles both CRLF and LF line endings
+            const lines = csvText.trim().split(/\r?\n/); // Handles CRLF and LF
             if (lines.length <= 1) throw new Error('CSVファイルにデータがありません (ヘッダー行のみ、または空)。');
 
             quizzes = lines
-                .slice(1) // Skip the header row (1st row)
+                .slice(1) // Skip the header row
                 .map(line => {
                     const parts = line.split(',');
-                    // Ensure all required parts exist before trying to access them
                     const question = parts[COLUMN_INDICES.QUESTION]?.trim();
                     const displayAnswer = parts[COLUMN_INDICES.DISPLAY_ANSWER]?.trim();
                     const readingAnswer = parts[COLUMN_INDICES.READING_ANSWER]?.trim();
 
-                    if (question && readingAnswer) { // Question and reading are essential
+                    if (question && readingAnswer) {
                         return {
                             question,
-                            displayAnswer: displayAnswer || readingAnswer, // Default displayAnswer to readingAnswer if empty
+                            displayAnswer: displayAnswer || readingAnswer,
                             readingAnswer
                         };
                     }
-                    return null; // Invalid row format
+                    return null;
                 })
-                .filter(quiz => quiz); // Remove any null entries from invalid rows
+                .filter(quiz => quiz); 
 
             if (quizzes.length === 0) throw new Error('有効なクイズデータが見つかりませんでした。CSVの形式と列指定を確認してください。');
             
-            shuffleArray(quizzes); // Randomize the order of quizzes
+            shuffleArray(quizzes); 
             totalQuestions = quizzes.length;
             currentQuestionIndex = 0;
+            correctAnswers = 0; // クイズデータロード時に統計リセット
+            questionsAttempted = 0;
+
 
             ui.loadingMessage.style.display = 'none';
             ui.quizArea.style.display = 'block';
@@ -97,8 +103,8 @@ document.addEventListener('DOMContentLoaded', () => {
     function displayQuestion() {
         ui.resultArea.style.display = 'none';
         ui.quizEndMessage.style.display = 'none';
-        ui.questionText.classList.remove('fade-in'); // For re-triggering animation
-        void ui.questionText.offsetWidth; // Force reflow
+        ui.questionText.classList.remove('fade-in');
+        void ui.questionText.offsetWidth; 
 
         if (currentQuestionIndex < totalQuestions) {
             const currentQuiz = quizzes[currentQuestionIndex];
@@ -111,7 +117,6 @@ document.addEventListener('DOMContentLoaded', () => {
             ui.questionText.classList.add('fade-in');
             ui.answerInput.focus();
         } else {
-            // All questions answered
             ui.quizArea.style.display = 'none';
             ui.resultArea.style.display = 'none';
             ui.quizEndMessage.style.display = 'block';
@@ -121,9 +126,20 @@ document.addEventListener('DOMContentLoaded', () => {
     function checkAnswer() {
         if (currentQuestionIndex >= totalQuestions) return;
 
+        questionsAttempted++; 
         const userAnswer = ui.answerInput.value.trim();
         const currentQuiz = quizzes[currentQuestionIndex];
         const isCorrect = userAnswer === currentQuiz.readingAnswer;
+        
+        if (isCorrect) {
+            correctAnswers++; 
+        }
+        
+        let rate = 0;
+        if (questionsAttempted > 0) {
+            rate = Math.round((correctAnswers / questionsAttempted) * 100);
+        }
+        ui.correctRateText.textContent = `正答率: ${rate}%`;
         
         ui.resultText.textContent = isCorrect ? '正解！ 🎉' : '不正解... 😢';
         ui.resultText.className = isCorrect ? 'correct' : 'incorrect';
@@ -138,7 +154,7 @@ document.addEventListener('DOMContentLoaded', () => {
         ui.submitAnswer.style.display = 'none';
         ui.nextQuestion.style.display = 'inline-block';
         ui.resultArea.style.display = 'block';
-        ui.nextQuestion.focus(); // Focus on the next button
+        ui.nextQuestion.focus(); 
     }
 
     // Event Listeners
