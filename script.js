@@ -13,9 +13,7 @@ document.addEventListener('DOMContentLoaded', () => {
         quizArea: document.getElementById('quizArea'),
         resultArea: document.getElementById('resultArea'),
         correctRateText: document.getElementById('correctRateText'),
-        // ▼▼▼ 不服ボタンUI要素追加 ▼▼▼
         disputeButton: document.getElementById('disputeButton')
-        // ▲▲▲ 不服ボタンUI要素追加 ▲▲▲
     };
 
     // --- Configuration ---
@@ -28,10 +26,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
     let quizzes = [];
     let currentQuestionIndex = 0;
-    let totalQuestions = 0;
+    let totalQuestions = 0; // totalQuestions変数はクイズ終了判定のために引き続き使用します
     let correctAnswers = 0;
     let questionsAttempted = 0;
-    let lastAnswerWasInitiallyIncorrect = false; // 不服ボタンの制御用
+    let lastAnswerWasInitiallyIncorrect = false;
 
     function shuffleArray(array) {
         for (let i = array.length - 1; i > 0; i--) {
@@ -95,15 +93,15 @@ document.addEventListener('DOMContentLoaded', () => {
         ui.quizEndMessage.style.display = 'none';
         ui.questionText.classList.remove('fade-in');
         void ui.questionText.offsetWidth; 
-        // ▼▼▼ 不服ボタンを隠す ▼▼▼
         ui.disputeButton.style.display = 'none';
-        lastAnswerWasInitiallyIncorrect = false; // リセット
-        // ▲▲▲ 不服ボタンを隠す ▲▲▲
+        lastAnswerWasInitiallyIncorrect = false;
 
 
         if (currentQuestionIndex < totalQuestions) {
             const currentQuiz = quizzes[currentQuestionIndex];
-            ui.questionNumberText.textContent = `問題 ${currentQuestionIndex + 1} / ${totalQuestions}`;
+            // ▼▼▼ 表示変更箇所 ▼▼▼
+            ui.questionNumberText.textContent = `問題 ${currentQuestionIndex + 1}`; 
+            // ▲▲▲ 表示変更箇所 ▲▲▲
             ui.questionText.textContent = currentQuiz.question;
             ui.answerInput.value = '';
             ui.answerInput.disabled = false;
@@ -134,21 +132,21 @@ document.addEventListener('DOMContentLoaded', () => {
         const currentQuiz = quizzes[currentQuestionIndex];
         const isCorrect = userAnswer === currentQuiz.readingAnswer;
         
-        lastAnswerWasInitiallyIncorrect = false; // まずリセット
+        lastAnswerWasInitiallyIncorrect = false;
 
         if (isCorrect) {
             correctAnswers++; 
             ui.resultText.textContent = '正解！ 🎉';
             ui.resultText.className = 'correct';
-            ui.disputeButton.style.display = 'none'; // 正解なら不服ボタンは不要
+            ui.disputeButton.style.display = 'none';
         } else {
             ui.resultText.textContent = '不正解... 😢';
             ui.resultText.className = 'incorrect';
-            ui.disputeButton.style.display = 'inline-block'; // 不正解なら不服ボタン表示
+            ui.disputeButton.style.display = 'inline-block';
             lastAnswerWasInitiallyIncorrect = true;
         }
         
-        updateCorrectRateDisplay(); // 正答率を更新
+        updateCorrectRateDisplay();
         
         let correctAnswerFormatted = `「${currentQuiz.readingAnswer}」`;
         if (currentQuiz.displayAnswer && currentQuiz.displayAnswer !== currentQuiz.readingAnswer) {
@@ -163,20 +161,17 @@ document.addEventListener('DOMContentLoaded', () => {
         ui.nextQuestion.focus(); 
     }
 
-    // ▼▼▼ 不服ボタン処理関数 ▼▼▼
     function handleDispute() {
-        if (!lastAnswerWasInitiallyIncorrect) return; // 直前が不正解でなければ何もしない（念のため）
+        if (!lastAnswerWasInitiallyIncorrect) return;
 
-        correctAnswers++; // 正解数を増やす
-        updateCorrectRateDisplay(); // 正答率を再計算して表示
+        correctAnswers++;
+        updateCorrectRateDisplay();
 
-        ui.resultText.textContent = '判定変更: 正解！ 🎉';
-        ui.resultText.className = 'correct'; // 表示を「正解」に変更
-        ui.disputeButton.style.display = 'none'; // 不服ボタンを隠す
-        lastAnswerWasInitiallyIncorrect = false; // 処理済み
+        ui.resultText.textContent = '判定変更: 正解！ 🤡';
+        ui.resultText.className = 'correct';
+        ui.disputeButton.style.display = 'none';
+        lastAnswerWasInitiallyIncorrect = false;
     }
-    // ▲▲▲ 不服ボタン処理関数 ▲▲▲
-
 
     // Event Listeners
     ui.submitAnswer.addEventListener('click', checkAnswer);
@@ -191,10 +186,7 @@ document.addEventListener('DOMContentLoaded', () => {
         displayQuestion();
     });
     
-    // ▼▼▼ 不服ボタンのイベントリスナー追加 ▼▼▼
     ui.disputeButton.addEventListener('click', handleDispute);
-    // ▲▲▲ 不服ボタンのイベントリスナー追加 ▲▲▲
-
 
     // Initialize
     loadQuizData();
