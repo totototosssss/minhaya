@@ -107,6 +107,7 @@ button {
     transition: all 0.25s ease;
     box-shadow: 0 4px 8px rgba(0,0,0,0.1);
     text-transform: uppercase;
+    margin: 5px; /* ボタン間のマージン調整 */
 }
 #submitAnswer {
     background-color: #3498db; /* Blue */
@@ -118,13 +119,27 @@ button {
 }
 #nextQuestion {
     background-color: #2ecc71; /* Green */
-    margin-top: 15px;
+    /* margin-top: 15px; /* 個別のマージンから共通マージンへ */
 }
 #nextQuestion:hover {
     background-color: #27ae60;
     transform: translateY(-2px);
     box-shadow: 0 6px 12px rgba(0,0,0,0.15);
 }
+
+/* ▼▼▼ 不服ボタンスタイル追加 ▼▼▼ */
+#disputeButton {
+    background-color: #f39c12; /* Orange / Amber */
+    font-size: 0.9em; /* 少し小さめに */
+    padding: 10px 20px;
+}
+#disputeButton:hover {
+    background-color: #e67e22;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 12px rgba(0,0,0,0.15);
+}
+/* ▲▲▲ 不服ボタンスタイル追加 ▲▲▲ */
+
 
 #resultArea {
     margin-top: 25px;
