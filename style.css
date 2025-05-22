@@ -25,7 +25,7 @@ body {
 }
 
 header {
-    margin-bottom: 25px;
+    margin-bottom: 15px;
 }
 
 h1 {
@@ -40,7 +40,7 @@ h1 {
     align-items: center;
     justify-content: center;
     gap: 15px;
-    margin-bottom: 20px;
+    margin-bottom: 10px;
 }
 
 #stoneImage {
@@ -55,6 +55,21 @@ h1 {
     font-weight: bold;
     font-size: 1.2em;
     margin: 0;
+}
+
+.feature-toggle {
+    margin-top: 10px;
+    margin-bottom: 20px;
+    font-size: 0.9em;
+    color: #555;
+}
+.feature-toggle input[type="checkbox"] {
+    margin-right: 5px;
+    vertical-align: middle;
+}
+.feature-toggle label {
+    vertical-align: middle;
+    cursor: pointer;
 }
 
 main {
@@ -73,14 +88,18 @@ main {
 }
 
 #questionText {
-    min-height: 60px;
+    min-height: 80px; /* ゆっくり表示のため、ある程度の高さを確保 */
     font-weight: 700;
     color: #34495e;
-    margin-bottom: 25px !important;
+    margin-bottom: 20px !important; /* ボタンとの間隔を少し空ける */
+    white-space: pre-wrap; 
+    line-height: 1.7; /* 行間を少し広げる */
+    text-align: left; /* 長文問題の場合、左揃えの方が見やすいことが多い */
+    padding: 5px;
 }
 
 #answerInput {
-    width: calc(100% - 26px); /* padding and border */
+    width: calc(100% - 26px);
     padding: 14px;
     margin-bottom: 20px;
     border: 1px solid #bdc3c7;
@@ -107,10 +126,10 @@ button {
     transition: all 0.25s ease;
     box-shadow: 0 4px 8px rgba(0,0,0,0.1);
     text-transform: uppercase;
-    margin: 5px; /* ボタン間のマージン調整 */
+    margin: 5px;
 }
 #submitAnswer {
-    background-color: #3498db; /* Blue */
+    background-color: #3498db;
 }
 #submitAnswer:hover {
     background-color: #2980b9;
@@ -118,8 +137,7 @@ button {
     box-shadow: 0 6px 12px rgba(0,0,0,0.15);
 }
 #nextQuestion {
-    background-color: #2ecc71; /* Green */
-    /* margin-top: 15px; /* 個別のマージンから共通マージンへ */
+    background-color: #2ecc71;
 }
 #nextQuestion:hover {
     background-color: #27ae60;
@@ -127,10 +145,9 @@ button {
     box-shadow: 0 6px 12px rgba(0,0,0,0.15);
 }
 
-/* ▼▼▼ 不服ボタンスタイル追加 ▼▼▼ */
 #disputeButton {
-    background-color: #f39c12; /* Orange / Amber */
-    font-size: 0.9em; /* 少し小さめに */
+    background-color: #f39c12;
+    font-size: 0.9em;
     padding: 10px 20px;
 }
 #disputeButton:hover {
@@ -138,7 +155,26 @@ button {
     transform: translateY(-2px);
     box-shadow: 0 6px 12px rgba(0,0,0,0.15);
 }
-/* ▲▲▲ 不服ボタンスタイル追加 ▲▲▲ */
+
+.utility-button { /* 表示停止ボタンなどの共通スタイル */
+    background-color: #95a5a6; /* Clouds */
+    font-size: 0.9em !important; /* 他のボタンより少し小さく */
+    padding: 8px 18px !important;
+    text-transform: none !important; /* 大文字化しない */
+    letter-spacing: normal !important;
+}
+.utility-button:hover {
+    background-color: #7f8c8d; /* Asbestos */
+    transform: translateY(-2px);
+    box-shadow: 0 6px 12px rgba(0,0,0,0.15);
+}
+
+#stopSlowDisplayTextButton { /* 表示停止ボタン特有の配置調整 */
+    display: block; 
+    margin-left: auto;
+    margin-right: auto;
+    margin-bottom: 15px;
+}
 
 
 #resultArea {
@@ -152,12 +188,9 @@ button {
     font-weight: 700;
     font-size: 1.3em;
 }
-#resultText.correct {
-    color: #2ecc71; /* Green */
-}
-#resultText.incorrect {
-    color: #e74c3c; /* Red */
-}
+#resultText.correct { color: #2ecc71; }
+#resultText.incorrect { color: #e74c3c; }
+
 #correctAnswerText {
     color: #555;
     font-size: 1.1em;
@@ -171,7 +204,6 @@ button {
 #loadingMessage { color: #3498db; }
 #errorMessage { color: #e74c3c; }
 #quizEndMessage { color: #2c3e50; font-size: 1.3em; }
-
 
 .fade-in {
     animation: fadeIn 0.6s ease-out;
