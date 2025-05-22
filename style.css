@@ -126,8 +126,8 @@ button { padding: 12px 28px; color: white; border: none; border-radius: 8px; cur
 /* ▼▼▼ YouTube動画埋め込みスタイル ▼▼▼ */
 .youtube-embed-wrapper {
     text-align: center; /* iframe自体を中央に */
-    margin-top: 30px;   /* クイズコンテナとの間隔 */
-    margin-bottom: 30px; /* ページ最下部との間隔 */
+    margin-top: 100px;   /* クイズコンテナとの間隔 */
+    margin-bottom: 50px; /* ページ最下部との間隔 */
     padding: 0 10px; /* 左右のパディング */
     width: 100%;
     box-sizing: border-box;
