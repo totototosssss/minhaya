@@ -259,8 +259,9 @@ document.addEventListener('DOMContentLoaded', () => {
             if (correctAnswerReading && correctAnswerReading.length > 0) {
                 const firstChar = correctAnswerReading[0];
                 const length = correctAnswerReading.length;
-                ui.hintTextDisplay.textContent = `ヒント: 最初の文字は「${firstChar}」、全部で ${length} 文字です。`;
-                ui.hintButton.disabled = true; // ヒントは1問につき1回まで
+                ui.hintTextDisplay.textContent = `ヒント: 最初の1文字「${firstChar}」(${length}文字)`;
+                ui.hintTextDisplay.style.display = 'block'; // ▼▼▼ テキストエリアを表示 ▼▼▼
+                ui.hintButton.disabled = true; 
             }
         }
     }
