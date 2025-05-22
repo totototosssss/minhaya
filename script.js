@@ -1,5 +1,6 @@
 document.addEventListener('DOMContentLoaded', () => {
     const ui = {
+        questionNumberText: document.getElementById('questionNumberText'),
         questionText: document.getElementById('questionText'),
         answerInput: document.getElementById('answerInput'),
         submitAnswer: document.getElementById('submitAnswer'),
@@ -8,23 +9,30 @@ document.addEventListener('DOMContentLoaded', () => {
         nextQuestion: document.getElementById('nextQuestion'),
         loadingMessage: document.getElementById('loadingMessage'),
         errorMessage: document.getElementById('errorMessage'),
+        quizEndMessage: document.getElementById('quizEndMessage'),
         quizArea: document.getElementById('quizArea'),
         resultArea: document.getElementById('resultArea')
     };
 
-    // --- 設定値 ---
+    // --- Configuration ---
     const CSV_FILE_PATH = 'みんはや問題リストv1.27 - 問題リスト.csv';
-    // ★★★ CSVの列インデックス (0から始まる) を実際のファイルに合わせてください ★★★
+    /**
+     * IMPORTANT: Adjust these column indices (0-based) to match your CSV file.
+     * Based on the header "問題答え読み最終確認日":
+     * Column 1 (問題) -> QUESTION: 0
+     * Column 2 (答え) -> DISPLAY_ANSWER: 1
+     * Column 3 (読み) -> READING_ANSWER: 2
+     */
     const COLUMN_INDICES = {
-        QUESTION: 0,        // 問題文の列 (例: 1列目なら0)
-        DISPLAY_ANSWER: 1,  // 解答の表記 (例: 漢字など。2列目なら1)
-        READING_ANSWER: 2   // 解答のよみがな (例: 3列目なら2)
+        QUESTION: 0,
+        DISPLAY_ANSWER: 1,
+        READING_ANSWER: 2
     };
 
     let quizzes = [];
     let currentQuestionIndex = 0;
+    let totalQuestions = 0;
 
-    // 配列をシャッフルする関数 (Fisher-Yates shuffle)
     function shuffleArray(array) {
         for (let i = array.length - 1; i > 0; i--) {
             const j = Math.floor(Math.random() * (i + 1));
@@ -34,54 +42,68 @@ document.addEventListener('DOMContentLoaded', () => {
 
     async function loadQuizData() {
         try {
+            ui.loadingMessage.style.display = 'block';
+            ui.errorMessage.style.display = 'none';
+            ui.quizArea.style.display = 'none';
+
             const response = await fetch(CSV_FILE_PATH);
-            if (!response.ok) throw new Error(`CSV読み込み失敗: ${response.statusText}`);
+            if (!response.ok) throw new Error(`CSVファイル読み込みエラー (${response.status}, ${response.statusText})`);
             
             let csvText = await response.text();
-            if (csvText.startsWith('\uFEFF')) csvText = csvText.substring(1); // BOM除去
+            // Remove BOM (Byte Order Mark) if present (especially for UTF-8 CSVs from Excel)
+            if (csvText.startsWith('\uFEFF')) csvText = csvText.substring(1);
 
-            const lines = csvText.trim().split('\n');
-            if (lines.length <= 1) throw new Error('CSVデータが少なすぎます (ヘッダー行のみ、または空)。');
+            const lines = csvText.trim().split(/\r?\n/); // Handles both CRLF and LF line endings
+            if (lines.length <= 1) throw new Error('CSVファイルにデータがありません (ヘッダー行のみ、または空)。');
 
             quizzes = lines
-                .slice(1) // ★ 1行目(ヘッダー)をスキップ
+                .slice(1) // Skip the header row (1st row)
                 .map(line => {
                     const parts = line.split(',');
+                    // Ensure all required parts exist before trying to access them
                     const question = parts[COLUMN_INDICES.QUESTION]?.trim();
                     const displayAnswer = parts[COLUMN_INDICES.DISPLAY_ANSWER]?.trim();
                     const readingAnswer = parts[COLUMN_INDICES.READING_ANSWER]?.trim();
 
-                    // 問題文と「よみ」は必須
-                    if (question && readingAnswer) {
-                        // displayAnswer が空の場合、readingAnswer と同じとして扱う
-                        return { question, displayAnswer: (displayAnswer || readingAnswer), readingAnswer };
+                    if (question && readingAnswer) { // Question and reading are essential
+                        return {
+                            question,
+                            displayAnswer: displayAnswer || readingAnswer, // Default displayAnswer to readingAnswer if empty
+                            readingAnswer
+                        };
                     }
-                    return null;
+                    return null; // Invalid row format
                 })
-                .filter(quiz => quiz);
+                .filter(quiz => quiz); // Remove any null entries from invalid rows
 
-            if (quizzes.length === 0) throw new Error('有効なクイズデータなし。CSV形式/列指定確認。');
+            if (quizzes.length === 0) throw new Error('有効なクイズデータが見つかりませんでした。CSVの形式と列指定を確認してください。');
             
-            shuffleArray(quizzes); // ★ クイズ配列をシャッフル
+            shuffleArray(quizzes); // Randomize the order of quizzes
+            totalQuestions = quizzes.length;
+            currentQuestionIndex = 0;
 
             ui.loadingMessage.style.display = 'none';
             ui.quizArea.style.display = 'block';
             displayQuestion();
+
         } catch (error) {
-            console.error('クイズデータ読み込みエラー:', error);
+            console.error('クイズデータの読み込みまたは処理中にエラーが発生しました:', error);
             ui.loadingMessage.style.display = 'none';
             ui.errorMessage.textContent = `エラー: ${error.message}`;
+            ui.errorMessage.style.display = 'block';
         }
     }
 
     function displayQuestion() {
         ui.resultArea.style.display = 'none';
-        ui.questionText.classList.remove('fade-in');
-        void ui.questionText.offsetWidth;  // アニメーション再トリガーのためのリフロー強制
+        ui.quizEndMessage.style.display = 'none';
+        ui.questionText.classList.remove('fade-in'); // For re-triggering animation
+        void ui.questionText.offsetWidth; // Force reflow
 
-        if (currentQuestionIndex < quizzes.length) {
-            const { question } = quizzes[currentQuestionIndex];
-            ui.questionText.textContent = `問題: ${question}`;
+        if (currentQuestionIndex < totalQuestions) {
+            const currentQuiz = quizzes[currentQuestionIndex];
+            ui.questionNumberText.textContent = `問題 ${currentQuestionIndex + 1} / ${totalQuestions}`;
+            ui.questionText.textContent = currentQuiz.question;
             ui.answerInput.value = '';
             ui.answerInput.disabled = false;
             ui.submitAnswer.style.display = 'inline-block';
@@ -89,31 +111,26 @@ document.addEventListener('DOMContentLoaded', () => {
             ui.questionText.classList.add('fade-in');
             ui.answerInput.focus();
         } else {
+            // All questions answered
             ui.quizArea.style.display = 'none';
-            ui.resultArea.style.display = 'block';
-            ui.resultText.textContent = 'クイズ全問終了！お疲れ様でした！';
-            ui.resultText.className = ''; // スタイルクラスをクリア
-            ui.correctAnswerText.textContent = '';
-            ui.nextQuestion.style.display = 'none';
+            ui.resultArea.style.display = 'none';
+            ui.quizEndMessage.style.display = 'block';
         }
     }
 
     function checkAnswer() {
-        if (currentQuestionIndex >= quizzes.length) return;
+        if (currentQuestionIndex >= totalQuestions) return;
 
         const userAnswer = ui.answerInput.value.trim();
-        const { displayAnswer, readingAnswer } = quizzes[currentQuestionIndex];
+        const currentQuiz = quizzes[currentQuestionIndex];
+        const isCorrect = userAnswer === currentQuiz.readingAnswer;
         
-        const isCorrect = userAnswer === readingAnswer; // 「よみ」で正誤判定
+        ui.resultText.textContent = isCorrect ? '正解！ 🎉' : '不正解... 😢';
+        ui.resultText.className = isCorrect ? 'correct' : 'incorrect';
         
-        ui.resultText.textContent = isCorrect ? '正解！' : '不正解...';
-        ui.resultText.className = isCorrect ? 'correct' : 'incorrect'; // 色付け用クラス
-        
-        // ★ 答えの表示方法を変更
-        let correctAnswerFormatted = `「${readingAnswer}」`;
-        // displayAnswer が存在し、かつ readingAnswer と異なる場合のみ括弧表記を追加
-        if (displayAnswer && displayAnswer !== readingAnswer) {
-            correctAnswerFormatted = `「${readingAnswer} (${displayAnswer})」`;
+        let correctAnswerFormatted = `「${currentQuiz.readingAnswer}」`;
+        if (currentQuiz.displayAnswer && currentQuiz.displayAnswer !== currentQuiz.readingAnswer) {
+            correctAnswerFormatted = `「${currentQuiz.readingAnswer} (${currentQuiz.displayAnswer})」`;
         }
         ui.correctAnswerText.textContent = isCorrect ? '' : `正解は ${correctAnswerFormatted} です。`;
         
@@ -121,18 +138,22 @@ document.addEventListener('DOMContentLoaded', () => {
         ui.submitAnswer.style.display = 'none';
         ui.nextQuestion.style.display = 'inline-block';
         ui.resultArea.style.display = 'block';
+        ui.nextQuestion.focus(); // Focus on the next button
     }
 
+    // Event Listeners
     ui.submitAnswer.addEventListener('click', checkAnswer);
-    ui.answerInput.addEventListener('keypress', e => {
-        if (e.key === 'Enter' && !ui.answerInput.disabled) { // 回答入力が有効な場合のみEnterキーで送信
-             checkAnswer();
+    ui.answerInput.addEventListener('keypress', (event) => {
+        if (event.key === 'Enter' && !ui.answerInput.disabled) {
+            checkAnswer();
         }
     });
+
     ui.nextQuestion.addEventListener('click', () => {
         currentQuestionIndex++;
         displayQuestion();
     });
 
+    // Initialize
     loadQuizData();
 });
