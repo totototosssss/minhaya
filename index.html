@@ -18,10 +18,10 @@
             <div class="controls-wrapper">
                 <div class="feature-toggle">
                     <input type="checkbox" id="enableSlowDisplayTextCheckbox">
-                    <label for="enableSlowDisplayTextCheckbox">形式的</label>
+                    <label for="enableSlowDisplayTextCheckbox">形式</label>
                 </div>
-                <div class="speed-control" id="speedControlArea" style="display: none;"> <label for="slowDisplayTextSpeedSlider">表示速度:</label>
-                    <input type="range" id="slowDisplayTextSpeedSlider" min="20" max="200" value="80" step="10">
+                <div class="speed-control" id="speedControlArea" style="display: none;"> <label for="slowDisplayTextSpeedSlider">速度:</label>
+                    <input type="range" id="slowDisplayTextSpeedSlider" min="20" max="400" value="80" step="10">
                     <span id="speedValueDisplay" class="speed-value">80ms</span>
                 </div>
                 </div>
@@ -31,9 +31,9 @@
             <div id="quizArea" style="display:none;">
                 <p id="questionNumberText" class="question-meta"></p>
                 <p id="questionText" class="fade-in"></p>
-                <button id="stopSlowDisplayTextButton" style="display:none;" class="utility-button">表示を停止</button>
+                <button id="stopSlowDisplayTextButton" style="display:none;" class="utility-button">押す!</button>
                 <input type="text" id="answerInput" placeholder="よみがなで答えを入力">
-                <button id="submitAnswer">回答する</button>
+                <button id="submitAnswer">回答!</button>
             </div>
 
             <div id="resultArea" style="display:none;">
@@ -45,7 +45,7 @@
 
             <p id="loadingMessage">クイズを読み込み中...</p>
             <p id="errorMessage" class="error-message"></p>
-            <p id="quizEndMessage" style="display:none;">クイズ全問終了！お疲れ様でした！</p>
+            <p id="quizEndMessage" style="display:none;">暇人すぎるだろ。</p>
         </main>
     </div>
 
