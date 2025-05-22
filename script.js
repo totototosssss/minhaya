@@ -50,7 +50,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function initializeQuiz() {
-        const useSlowRead = window.confirm("問題文を徐々に表示する機能を使用しますか？\n（この設定は後でチェックボックスから変更できます）");
+        const useSlowRead = window.confirm("問題文を徐々に表示する機能を使用しますか?");
         ui.enableSlowDisplayTextCheckbox.checked = useSlowRead;
         if (useSlowRead) {
             ui.speedControlArea.style.display = 'flex';
