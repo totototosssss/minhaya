@@ -249,7 +249,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function handleDispute() {
-        if (!lastAnswerWasInitiallyIncorrect) return; correctAnswers++; updateCorrectRateDisplay(); ui.resultText.textContent = '判定変更: 正解！ 🎉'; ui.resultText.className = 'correct'; ui.disputeButton.style.display = 'none'; lastAnswerWasInitiallyIncorrect = false;
+        if (!lastAnswerWasInitiallyIncorrect) return; correctAnswers++; updateCorrectRateDisplay(); ui.resultText.textContent = '判定変更: 正解！ 🤡'; ui.resultText.className = 'correct'; ui.disputeButton.style.display = 'none'; lastAnswerWasInitiallyIncorrect = false;
     }
     
     // ▼▼▼ ヒントボタン処理関数 ▼▼▼
