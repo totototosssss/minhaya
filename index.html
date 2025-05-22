@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>研一と学ぶみんはやクイズ</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <h1>研一と学ぶみんはやクイズ</h1>
+        <img src="stone.png" alt="Stone Image" id="stoneImage">
+
+        <div id="quizArea">
+            <p id="questionText"></p>
+            <input type="text" id="answerInput" placeholder="答えを入力してください">
+            <button id="submitAnswer">回答</button>
+        </div>
+
+        <div id="resultArea">
+            <p id="resultText"></p>
+            <p id="correctAnswerText"></p>
+            <button id="nextQuestion" style="display:none;">次の問題へ</button>
+        </div>
+
+        <p id="loadingMessage">クイズを読み込み中...</p>
+        <p id="errorMessage" style="color: red;"></p>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
