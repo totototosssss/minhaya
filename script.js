@@ -53,7 +53,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
                     // 問題文と「よみ」は必須
                     if (question && readingAnswer) {
-                        return { question, displayAnswer: displayAnswer || readingAnswer, readingAnswer };
+                        // displayAnswer が空の場合、readingAnswer と同じとして扱う
+                        return { question, displayAnswer: (displayAnswer || readingAnswer), readingAnswer };
                     }
                     return null;
                 })
@@ -76,7 +77,7 @@ document.addEventListener('DOMContentLoaded', () => {
     function displayQuestion() {
         ui.resultArea.style.display = 'none';
         ui.questionText.classList.remove('fade-in');
-        void ui.questionText.offsetWidth; 
+        void ui.questionText.offsetWidth;  // アニメーション再トリガーのためのリフロー強制
 
         if (currentQuestionIndex < quizzes.length) {
             const { question } = quizzes[currentQuestionIndex];
@@ -91,7 +92,7 @@ document.addEventListener('DOMContentLoaded', () => {
             ui.quizArea.style.display = 'none';
             ui.resultArea.style.display = 'block';
             ui.resultText.textContent = 'クイズ全問終了！お疲れ様でした！';
-            ui.resultText.className = '';
+            ui.resultText.className = ''; // スタイルクラスをクリア
             ui.correctAnswerText.textContent = '';
             ui.nextQuestion.style.display = 'none';
         }
@@ -103,13 +104,14 @@ document.addEventListener('DOMContentLoaded', () => {
         const userAnswer = ui.answerInput.value.trim();
         const { displayAnswer, readingAnswer } = quizzes[currentQuestionIndex];
         
-        const isCorrect = userAnswer === readingAnswer;
+        const isCorrect = userAnswer === readingAnswer; // 「よみ」で正誤判定
         
         ui.resultText.textContent = isCorrect ? '正解！' : '不正解...';
-        ui.resultText.className = isCorrect ? 'correct' : 'incorrect';
+        ui.resultText.className = isCorrect ? 'correct' : 'incorrect'; // 色付け用クラス
         
         // ★ 答えの表示方法を変更
         let correctAnswerFormatted = `「${readingAnswer}」`;
+        // displayAnswer が存在し、かつ readingAnswer と異なる場合のみ括弧表記を追加
         if (displayAnswer && displayAnswer !== readingAnswer) {
             correctAnswerFormatted = `「${readingAnswer} (${displayAnswer})」`;
         }
@@ -122,7 +124,11 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     ui.submitAnswer.addEventListener('click', checkAnswer);
-    ui.answerInput.addEventListener('keypress', e => e.key === 'Enter' && checkAnswer());
+    ui.answerInput.addEventListener('keypress', e => {
+        if (e.key === 'Enter' && !ui.answerInput.disabled) { // 回答入力が有効な場合のみEnterキーで送信
+             checkAnswer();
+        }
+    });
     ui.nextQuestion.addEventListener('click', () => {
         currentQuestionIndex++;
         displayQuestion();
