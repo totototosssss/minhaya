@@ -12,18 +12,14 @@ document.addEventListener('DOMContentLoaded', () => {
         quizEndMessage: document.getElementById('quizEndMessage'),
         quizArea: document.getElementById('quizArea'),
         resultArea: document.getElementById('resultArea'),
-        correctRateText: document.getElementById('correctRateText') // 正答率表示用
+        correctRateText: document.getElementById('correctRateText'),
+        // ▼▼▼ 不服ボタンUI要素追加 ▼▼▼
+        disputeButton: document.getElementById('disputeButton')
+        // ▲▲▲ 不服ボタンUI要素追加 ▲▲▲
     };
 
     // --- Configuration ---
     const CSV_FILE_PATH = 'みんはや問題リストv1.27 - 問題リスト.csv';
-    /**
-     * IMPORTANT: Adjust these column indices (0-based) to match your CSV file.
-     * Based on the header "問題答え読み最終確認日" (assumed):
-     * Column 1 (問題) -> QUESTION: 0
-     * Column 2 (答え) -> DISPLAY_ANSWER: 1
-     * Column 3 (読み) -> READING_ANSWER: 2
-     */
     const COLUMN_INDICES = {
         QUESTION: 0,
         DISPLAY_ANSWER: 1,
@@ -35,6 +31,7 @@ document.addEventListener('DOMContentLoaded', () => {
     let totalQuestions = 0;
     let correctAnswers = 0;
     let questionsAttempted = 0;
+    let lastAnswerWasInitiallyIncorrect = false; // 不服ボタンの制御用
 
     function shuffleArray(array) {
         for (let i = array.length - 1; i > 0; i--) {
@@ -48,32 +45,26 @@ document.addEventListener('DOMContentLoaded', () => {
             ui.loadingMessage.style.display = 'block';
             ui.errorMessage.style.display = 'none';
             ui.quizArea.style.display = 'none';
-            ui.correctRateText.textContent = '正答率: ---'; // 初期表示
+            ui.correctRateText.textContent = '正答率: ---';
 
             const response = await fetch(CSV_FILE_PATH);
             if (!response.ok) throw new Error(`CSVファイル読み込みエラー (${response.status}, ${response.statusText})`);
             
             let csvText = await response.text();
-            // Remove BOM (Byte Order Mark) if present
             if (csvText.startsWith('\uFEFF')) csvText = csvText.substring(1);
 
-            const lines = csvText.trim().split(/\r?\n/); // Handles CRLF and LF
+            const lines = csvText.trim().split(/\r?\n/);
             if (lines.length <= 1) throw new Error('CSVファイルにデータがありません (ヘッダー行のみ、または空)。');
 
             quizzes = lines
-                .slice(1) // Skip the header row
+                .slice(1)
                 .map(line => {
                     const parts = line.split(',');
                     const question = parts[COLUMN_INDICES.QUESTION]?.trim();
                     const displayAnswer = parts[COLUMN_INDICES.DISPLAY_ANSWER]?.trim();
                     const readingAnswer = parts[COLUMN_INDICES.READING_ANSWER]?.trim();
-
                     if (question && readingAnswer) {
-                        return {
-                            question,
-                            displayAnswer: displayAnswer || readingAnswer,
-                            readingAnswer
-                        };
+                        return { question, displayAnswer: displayAnswer || readingAnswer, readingAnswer };
                     }
                     return null;
                 })
@@ -84,9 +75,8 @@ document.addEventListener('DOMContentLoaded', () => {
             shuffleArray(quizzes); 
             totalQuestions = quizzes.length;
             currentQuestionIndex = 0;
-            correctAnswers = 0; // クイズデータロード時に統計リセット
+            correctAnswers = 0;
             questionsAttempted = 0;
-
 
             ui.loadingMessage.style.display = 'none';
             ui.quizArea.style.display = 'block';
@@ -105,6 +95,11 @@ document.addEventListener('DOMContentLoaded', () => {
         ui.quizEndMessage.style.display = 'none';
         ui.questionText.classList.remove('fade-in');
         void ui.questionText.offsetWidth; 
+        // ▼▼▼ 不服ボタンを隠す ▼▼▼
+        ui.disputeButton.style.display = 'none';
+        lastAnswerWasInitiallyIncorrect = false; // リセット
+        // ▲▲▲ 不服ボタンを隠す ▲▲▲
+
 
         if (currentQuestionIndex < totalQuestions) {
             const currentQuiz = quizzes[currentQuestionIndex];
@@ -123,6 +118,14 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
+    function updateCorrectRateDisplay() {
+        let rate = 0;
+        if (questionsAttempted > 0) {
+            rate = Math.round((correctAnswers / questionsAttempted) * 100);
+        }
+        ui.correctRateText.textContent = `正答率: ${rate}%`;
+    }
+
     function checkAnswer() {
         if (currentQuestionIndex >= totalQuestions) return;
 
@@ -131,18 +134,21 @@ document.addEventListener('DOMContentLoaded', () => {
         const currentQuiz = quizzes[currentQuestionIndex];
         const isCorrect = userAnswer === currentQuiz.readingAnswer;
         
+        lastAnswerWasInitiallyIncorrect = false; // まずリセット
+
         if (isCorrect) {
             correctAnswers++; 
+            ui.resultText.textContent = '正解！ 🎉';
+            ui.resultText.className = 'correct';
+            ui.disputeButton.style.display = 'none'; // 正解なら不服ボタンは不要
+        } else {
+            ui.resultText.textContent = '不正解... 😢';
+            ui.resultText.className = 'incorrect';
+            ui.disputeButton.style.display = 'inline-block'; // 不正解なら不服ボタン表示
+            lastAnswerWasInitiallyIncorrect = true;
         }
         
-        let rate = 0;
-        if (questionsAttempted > 0) {
-            rate = Math.round((correctAnswers / questionsAttempted) * 100);
-        }
-        ui.correctRateText.textContent = `正答率: ${rate}%`;
-        
-        ui.resultText.textContent = isCorrect ? '正解！ 🎉' : '不正解... 😢';
-        ui.resultText.className = isCorrect ? 'correct' : 'incorrect';
+        updateCorrectRateDisplay(); // 正答率を更新
         
         let correctAnswerFormatted = `「${currentQuiz.readingAnswer}」`;
         if (currentQuiz.displayAnswer && currentQuiz.displayAnswer !== currentQuiz.readingAnswer) {
@@ -157,6 +163,21 @@ document.addEventListener('DOMContentLoaded', () => {
         ui.nextQuestion.focus(); 
     }
 
+    // ▼▼▼ 不服ボタン処理関数 ▼▼▼
+    function handleDispute() {
+        if (!lastAnswerWasInitiallyIncorrect) return; // 直前が不正解でなければ何もしない（念のため）
+
+        correctAnswers++; // 正解数を増やす
+        updateCorrectRateDisplay(); // 正答率を再計算して表示
+
+        ui.resultText.textContent = '判定変更: 正解！ 🎉';
+        ui.resultText.className = 'correct'; // 表示を「正解」に変更
+        ui.disputeButton.style.display = 'none'; // 不服ボタンを隠す
+        lastAnswerWasInitiallyIncorrect = false; // 処理済み
+    }
+    // ▲▲▲ 不服ボタン処理関数 ▲▲▲
+
+
     // Event Listeners
     ui.submitAnswer.addEventListener('click', checkAnswer);
     ui.answerInput.addEventListener('keypress', (event) => {
@@ -169,6 +190,11 @@ document.addEventListener('DOMContentLoaded', () => {
         currentQuestionIndex++;
         displayQuestion();
     });
+    
+    // ▼▼▼ 不服ボタンのイベントリスナー追加 ▼▼▼
+    ui.disputeButton.addEventListener('click', handleDispute);
+    // ▲▲▲ 不服ボタンのイベントリスナー追加 ▲▲▲
+
 
     // Initialize
     loadQuizData();
