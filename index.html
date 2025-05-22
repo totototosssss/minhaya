@@ -3,49 +3,61 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>研一と学ぶ みんはや</title> <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;700&display=swap" rel="stylesheet">
+    <title>研一と学ぶ　みんはや</title>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
     <div class="container">
         <header>
-            <h1>研一と学ぶ みんはや</h1> <div class="image-stats-wrapper">
+            <h1>研一と学ぶ　みんはや</h1>
+            <div class="image-stats-wrapper">
                 <img src="stone.png" alt="Stone Image" id="stoneImage">
                 <p id="correctRateText" class="stats-text">正答率: ---</p>
             </div>
             <div class="controls-wrapper">
                 <div class="feature-toggle">
                     <input type="checkbox" id="enableSlowDisplayTextCheckbox">
-                    <label for="enableSlowDisplayTextCheckbox">形式</label> </div>
+                    <label for="enableSlowDisplayTextCheckbox">形式</label>
+                </div>
                 <div class="speed-control" id="speedControlArea" style="display: none;">
                     <label for="slowDisplayTextSpeedSlider">速度:</label>
-                    <input type="range" id="slowDisplayTextSpeedSlider" min="20" max="400" value="150" step="5"> <span id="speedValueDisplay" class="speed-value">150ms</span> </div>
-            </div>
+                    <input type="range" id="slowDisplayTextSpeedSlider" min="20" max="400" value="150" step="5">
+                    <span id="speedValueDisplay" class="speed-value">150ms</span>
+                </div>
+                <div class="feature-toggle">
+                    <input type="checkbox" id="enableHintCheckbox" checked> 
+                    <label for="enableHintCheckbox">ヒントを表示する</label>
+                </div>
+                </div>
         </header>
 
         <main>
             <div id="quizArea" style="display:none;">
                 <p id="questionNumberText" class="question-meta"></p>
                 <p id="questionText" class="fade-in"></p>
-                <button id="stopSlowDisplayTextButton" style="display:none;" class="utility-button">表示を停止して回答</button>
+                <button id="stopSlowDisplayTextButton" style="display:none;" class="utility-button">押す!</button>
+                
                 <input type="text" id="answerInput" placeholder="よみがなで答えを入力">
-                <button id="submitAnswer">回答する</button>
+                <button id="submitAnswer">回答!</button>
             </div>
-    
-            <div class="hint-area-container"> 
+
+            <div class="hint-area-container">
                 <button id="hintButton" class="utility-button">ヒント</button>
                 <p id="hintTextDisplay" class="hint-text"></p>
             </div>
-            
+
             <div id="resultArea" style="display:none;">
                 <p id="resultText"></p>
                 <p id="correctAnswerText"></p>
-                <button id="disputeButton" style="display:none;">不服！これは正解だろ...</button> <button id="nextQuestion">次の問題へ</button>
+                <button id="disputeButton" style="display:none;">不服！これは正解だろ...</button>
+                <button id="nextQuestion">次の問題へ</button>
             </div>
-    
+
             <p id="loadingMessage">クイズを読み込み中...</p>
             <p id="errorMessage" class="error-message"></p>
-            <p id="quizEndMessage" style="display:none;">クイズ全問終了！暇人すぎだろ!</p> </main>
+            <p id="quizEndMessage" style="display:none;">クイズ全問終了！暇人すぎだろ。</p>
+        </main>
     </div>
 
     <script src="script.js"></script>
