@@ -100,7 +100,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (currentQuestionIndex < totalQuestions) {
             const currentQuiz = quizzes[currentQuestionIndex];
             // ▼▼▼ 表示変更箇所 ▼▼▼
-            ui.questionNumberText.textContent = `第 ${currentQuestionIndex + 1}問`; 
+            ui.questionNumberText.textContent = `第${currentQuestionIndex + 1}問`; 
             // ▲▲▲ 表示変更箇所 ▲▲▲
             ui.questionText.textContent = currentQuiz.question;
             ui.answerInput.value = '';
