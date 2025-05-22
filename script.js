@@ -207,7 +207,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!lastAnswerWasInitiallyIncorrect) return;
         correctAnswers++;
         updateCorrectRateDisplay();
-        ui.resultText.textContent = '判定変更: 正解！ 🎉';
+        ui.resultText.textContent = '判定変更: 正解！ 🤡';
         ui.resultText.className = 'correct';
         ui.disputeButton.style.display = 'none';
         lastAnswerWasInitiallyIncorrect = false;
