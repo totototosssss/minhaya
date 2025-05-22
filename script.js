@@ -19,10 +19,12 @@ document.addEventListener('DOMContentLoaded', () => {
         speedControlArea: document.getElementById('speedControlArea'),
         slowDisplayTextSpeedSlider: document.getElementById('slowDisplayTextSpeedSlider'),
         speedValueDisplay: document.getElementById('speedValueDisplay'),
-        // ▼▼▼ ヒント機能UI要素追加 ▼▼▼
         hintButton: document.getElementById('hintButton'),
-        hintTextDisplay: document.getElementById('hintTextDisplay')
-        // ▲▲▲ ヒント機能UI要素追加 ▲▲▲
+        hintTextDisplay: document.getElementById('hintTextDisplay'),
+        // ▼▼▼ UI要素追加 ▼▼▼
+        enableHintCheckbox: document.getElementById('enableHintCheckbox'),
+        hintAreaContainer: document.querySelector('.hint-area-container')
+        // ▲▲▲ UI要素追加 ▲▲▲
     };
 
     const CSV_FILE_PATH = 'みんはや問題リストv1.27 - 問題リスト.csv';
@@ -38,7 +40,7 @@ document.addEventListener('DOMContentLoaded', () => {
     let slowDisplayTextIntervalId = null;
     let currentQuestionFullText = '';
     let currentDisplayedCharIndex = 0;
-    let stoppedAtIndex = -1; // ▼▼▼ どこで表示停止したかを記録する変数 ▼▼▼
+    let stoppedAtIndex = -1;
 
     function shuffleArray(array) {
         for (let i = array.length - 1; i > 0; i--) {
@@ -56,6 +58,15 @@ document.addEventListener('DOMContentLoaded', () => {
             ui.speedControlArea.style.display = 'none';
         }
         ui.speedValueDisplay.textContent = `${ui.slowDisplayTextSpeedSlider.value}ms`;
+
+        // ▼▼▼ ヒント表示の初期設定 ▼▼▼
+        if (ui.enableHintCheckbox.checked) {
+            ui.hintAreaContainer.style.display = 'block'; // または 'flex' など適切な値
+        } else {
+            ui.hintAreaContainer.style.display = 'none';
+        }
+        // ▲▲▲ ヒント表示の初期設定 ▲▲▲
+
         loadQuizData();
     }
 
@@ -101,7 +112,7 @@ document.addEventListener('DOMContentLoaded', () => {
     function onSlowDisplayNaturalFinish() {
         if(slowDisplayTextIntervalId) clearInterval(slowDisplayTextIntervalId);
         slowDisplayTextIntervalId = null;
-        stoppedAtIndex = -1; // 自然完了なので停止位置記録は不要
+        stoppedAtIndex = -1; 
         ui.stopSlowDisplayTextButton.style.display = 'none';
         ui.answerInput.disabled = false;
         ui.submitAnswer.disabled = false;
@@ -112,7 +123,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (slowDisplayTextIntervalId) {
             clearInterval(slowDisplayTextIntervalId);
             slowDisplayTextIntervalId = null;
-            stoppedAtIndex = currentDisplayedCharIndex; // ▼▼▼ 停止位置を記録 ▼▼▼
+            stoppedAtIndex = currentDisplayedCharIndex; 
         }
         ui.stopSlowDisplayTextButton.style.display = 'none';
         ui.answerInput.disabled = false;
@@ -144,22 +155,29 @@ document.addEventListener('DOMContentLoaded', () => {
         void ui.questionText.offsetWidth; 
         ui.disputeButton.style.display = 'none';
         lastAnswerWasInitiallyIncorrect = false;
-        stoppedAtIndex = -1; // ▼▼▼ 新しい問題の開始時に停止位置をリセット ▼▼▼
+        stoppedAtIndex = -1;
 
         if (slowDisplayTextIntervalId) { clearInterval(slowDisplayTextIntervalId); slowDisplayTextIntervalId = null; }
         ui.stopSlowDisplayTextButton.style.display = 'none';
 
-        // ▼▼▼ ヒント表示をリセット ▼▼▼
+        // ▼▼▼ ヒント表示のリセットと表示状態の制御 ▼▼▼
         ui.hintTextDisplay.textContent = '';
-        ui.hintButton.disabled = false; // ヒントボタンを有効化
-        // ▲▲▲ ヒント表示をリセット ▲▲▲
+        ui.hintTextDisplay.style.display = 'none'; 
+        ui.hintButton.disabled = false;
+        // ヒントコンテナ自体の表示はチェックボックスに連動させるので、ここではボタンの表示のみ制御
+        if (ui.enableHintCheckbox.checked) {
+            ui.hintButton.style.display = 'block'; // hintAreaContainerがblockなら、その中のボタンもblockに
+        } else {
+            ui.hintButton.style.display = 'none'; // チェックが外れていればボタンも隠す
+        }
+        // ▲▲▲ ヒント表示のリセットと表示状態の制御 ▲▲▲
 
         if (currentQuestionIndex < totalQuestions) {
             const currentQuiz = quizzes[currentQuestionIndex];
             currentQuestionFullText = currentQuiz.question;
             currentDisplayedCharIndex = 0;
-            ui.questionText.textContent = ''; // 必ずクリア
-            ui.questionText.innerHTML = ''; // スタイル用spanもクリア
+            ui.questionText.textContent = ''; 
+            ui.questionText.innerHTML = ''; 
 
             ui.questionNumberText.textContent = `第${currentQuestionIndex + 1}問`;
             
@@ -180,11 +198,12 @@ document.addEventListener('DOMContentLoaded', () => {
             }
             ui.submitAnswer.style.display = 'inline-block';
             ui.nextQuestion.style.display = 'none';
-            ui.questionText.classList.add('fade-in'); // これはテキスト内容セット後に適用したい
+            ui.questionText.classList.add('fade-in');
         } else {
             ui.quizArea.style.display = 'none';
             ui.resultArea.style.display = 'none';
             ui.quizEndMessage.style.display = 'block';
+            ui.hintAreaContainer.style.display = 'none'; // ▼▼▼ クイズ終了時はヒントエリア全体を隠す ▼▼▼
         }
     }
 
@@ -194,10 +213,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function checkAnswer() {
         if (currentQuestionIndex >= totalQuestions) return;
-        if (slowDisplayTextIntervalId) { // 回答時にゆっくり表示がまだ動いていたら強制停止（テキストはそのまま）
+        if (slowDisplayTextIntervalId) {
             clearInterval(slowDisplayTextIntervalId);
             slowDisplayTextIntervalId = null;
-            // stoppedAtIndex は stopProgressiveDisplayAndEnableInput で設定されるので、ここでは不要
+            if (stoppedAtIndex === -1) stoppedAtIndex = currentDisplayedCharIndex; 
         }
 
         questionsAttempted++; 
@@ -224,22 +243,12 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         ui.correctAnswerText.textContent = isCorrect ? '' : `正解は ${correctAnswerFormatted} です。`;
         
-        // 回答結果表示後、問題文が途中だった場合は全文表示し、停止位置をマーク
-        if (ui.questionText.textContent.length < currentQuestionFullText.length) {
-            ui.questionText.textContent = currentQuestionFullText; // まず全文表示
-        }
-        // ▼▼▼ 停止位置の視覚的フィードバック ▼▼▼
+        ui.questionText.textContent = currentQuestionFullText; // まず全文表示
         if (stoppedAtIndex > 0 && stoppedAtIndex < currentQuestionFullText.length) {
             const preText = currentQuestionFullText.substring(0, stoppedAtIndex);
             const postText = currentQuestionFullText.substring(stoppedAtIndex);
             ui.questionText.innerHTML = `<span class="stopped-text-segment">${preText}</span>${postText}`;
-        } else {
-             // 停止しなかった場合や全文表示で止めた場合は、通常の全文テキストのまま (innerHTMLを使わない)
-             // ただし、上記の全文表示処理でtextContentが既にセットされているので、ここは何もしなくても良いか、
-             // 明示的にtextContentで再セットする。
-             ui.questionText.textContent = currentQuestionFullText;
         }
-        // ▲▲▲ 停止位置の視覚的フィードバック ▲▲▲
 
         ui.answerInput.disabled = true;
         ui.submitAnswer.disabled = true;
@@ -252,7 +261,6 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!lastAnswerWasInitiallyIncorrect) return; correctAnswers++; updateCorrectRateDisplay(); ui.resultText.textContent = '判定変更　🤡'; ui.resultText.className = 'correct'; ui.disputeButton.style.display = 'none'; lastAnswerWasInitiallyIncorrect = false;
     }
     
-    // ▼▼▼ ヒントボタン処理関数 ▼▼▼
     function handleHintClick() {
         if (currentQuestionIndex < totalQuestions) {
             const correctAnswerReading = quizzes[currentQuestionIndex].readingAnswer;
@@ -260,12 +268,11 @@ document.addEventListener('DOMContentLoaded', () => {
                 const firstChar = correctAnswerReading[0];
                 const length = correctAnswerReading.length;
                 ui.hintTextDisplay.textContent = `ヒント: 最初の1文字「${firstChar}」(${length}文字)`;
-                ui.hintTextDisplay.style.display = 'block'; // ▼▼▼ テキストエリアを表示 ▼▼▼
+                ui.hintTextDisplay.style.display = 'block';
                 ui.hintButton.disabled = true; 
             }
         }
     }
-    // ▲▲▲ ヒントボタン処理関数 ▲▲▲
 
     // Event Listeners
     ui.submitAnswer.addEventListener('click', checkAnswer);
@@ -273,8 +280,7 @@ document.addEventListener('DOMContentLoaded', () => {
     ui.nextQuestion.addEventListener('click', () => { currentQuestionIndex++; displayQuestion(); });
     ui.disputeButton.addEventListener('click', handleDispute);
     ui.stopSlowDisplayTextButton.addEventListener('click', stopProgressiveDisplayAndEnableInput);
-    ui.hintButton.addEventListener('click', handleHintClick); // ▼▼▼ ヒントボタンリスナー追加 ▼▼▼
-
+    ui.hintButton.addEventListener('click', handleHintClick);
 
     ui.enableSlowDisplayTextCheckbox.addEventListener('change', () => {
         if (ui.enableSlowDisplayTextCheckbox.checked) {
@@ -288,7 +294,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 ui.stopSlowDisplayTextButton.style.display = 'none';
                 ui.answerInput.disabled = false;
                 ui.submitAnswer.disabled = false;
-                if (currentQuestionIndex < totalQuestions) ui.answerInput.focus(); // クイズ中ならフォーカス
+                if (currentQuestionIndex < totalQuestions) ui.answerInput.focus();
             }
         }
     });
@@ -300,6 +306,20 @@ document.addEventListener('DOMContentLoaded', () => {
             startOrRestartSlowDisplayInterval(); 
         }
     });
+
+    // ▼▼▼ ヒント表示チェックボックスのイベントリスナー ▼▼▼
+    ui.enableHintCheckbox.addEventListener('change', () => {
+        if (ui.enableHintCheckbox.checked) {
+            ui.hintAreaContainer.style.display = 'block'; // CSSで指定したデフォルトの表示に戻す
+             if(currentQuestionIndex < totalQuestions) { // クイズ中ならヒントボタンも表示
+                ui.hintButton.style.display = 'block';
+             }
+        } else {
+            ui.hintAreaContainer.style.display = 'none';
+        }
+    });
+    // ▲▲▲ ヒント表示チェックボックスのイベントリスナー ▲▲▲
+
 
     initializeQuiz(); 
 });
