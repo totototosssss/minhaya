@@ -57,11 +57,15 @@ h1 {
     margin: 0;
 }
 
-.feature-toggle {
+.controls-wrapper {
     margin-top: 10px;
     margin-bottom: 20px;
     font-size: 0.9em;
     color: #555;
+}
+
+.feature-toggle {
+    margin-bottom: 10px; /* スライダーとの間隔 */
 }
 .feature-toggle input[type="checkbox"] {
     margin-right: 5px;
@@ -71,6 +75,29 @@ h1 {
     vertical-align: middle;
     cursor: pointer;
 }
+
+/* ▼▼▼ 速度調整スライダーのスタイル ▼▼▼ */
+.speed-control {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    font-size: 0.95em; /* feature-toggle内の相対的なサイズ */
+}
+.speed-control label {
+    white-space: nowrap;
+}
+.speed-control input[type="range"] {
+    width: 120px; /* スライダーの幅 */
+    vertical-align: middle;
+}
+.speed-value {
+    min-width: 50px; /* 値表示エリアの最小幅 */
+    text-align: left;
+    font-weight: bold;
+}
+/* ▲▲▲ 速度調整スライダーのスタイル ▲▲▲ */
+
 
 main {
     /* main specific styles if any */
@@ -88,13 +115,13 @@ main {
 }
 
 #questionText {
-    min-height: 80px; /* ゆっくり表示のため、ある程度の高さを確保 */
+    min-height: 80px;
     font-weight: 700;
     color: #34495e;
-    margin-bottom: 20px !important; /* ボタンとの間隔を少し空ける */
+    margin-bottom: 20px !important;
     white-space: pre-wrap; 
-    line-height: 1.7; /* 行間を少し広げる */
-    text-align: left; /* 長文問題の場合、左揃えの方が見やすいことが多い */
+    line-height: 1.7;
+    text-align: left;
     padding: 5px;
 }
 
@@ -156,20 +183,20 @@ button {
     box-shadow: 0 6px 12px rgba(0,0,0,0.15);
 }
 
-.utility-button { /* 表示停止ボタンなどの共通スタイル */
-    background-color: #95a5a6; /* Clouds */
-    font-size: 0.9em !important; /* 他のボタンより少し小さく */
+.utility-button {
+    background-color: #95a5a6;
+    font-size: 0.9em !important;
     padding: 8px 18px !important;
-    text-transform: none !important; /* 大文字化しない */
+    text-transform: none !important;
     letter-spacing: normal !important;
 }
 .utility-button:hover {
-    background-color: #7f8c8d; /* Asbestos */
+    background-color: #7f8c8d;
     transform: translateY(-2px);
     box-shadow: 0 6px 12px rgba(0,0,0,0.15);
 }
 
-#stopSlowDisplayTextButton { /* 表示停止ボタン特有の配置調整 */
+#stopSlowDisplayTextButton {
     display: block; 
     margin-left: auto;
     margin-right: auto;
