@@ -1,149 +1,33 @@
-body {
-    font-family: 'Noto Sans JP', sans-serif;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    min-height: 100vh;
-    background: linear-gradient(135deg, #72edf2 10%, #5151e5 100%);
-    margin: 0;
-    padding: 20px;
-    box-sizing: border-box;
-    color: #333;
-    line-height: 1.6;
-}
-
-.container {
-    background-color: rgba(255, 255, 255, 0.97);
-    padding: 30px 45px;
-    border-radius: 15px;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.15);
-    text-align: center;
-    width: 100%;
-    max-width: 700px;
-    transition: transform 0.3s ease-out;
-}
+/* body, .container, h1 は変更なし */
 
 header {
     margin-bottom: 25px;
+    /* text-align: center; は .container にあるのでヘッダー内要素は中央揃えになる */
 }
 
-h1 {
-    color: #2c3e50;
-    margin-bottom: 15px;
-    font-weight: 700;
-    font-size: 2em;
+/* ▼▼▼ 追加/変更箇所 ▼▼▼ */
+.image-stats-wrapper {
+    display: flex; /* 画像とテキストを横並びにする */
+    align-items: center; /* 上下中央揃え */
+    justify-content: center; /* グループ全体を中央揃え */
+    gap: 15px; /* 画像とテキストの間隔 */
+    margin-bottom: 20px; /* グループ全体の下マージン */
 }
 
 #stoneImage {
-    max-width: 90px;
-    margin-bottom: 20px;
-    border-radius: 50%;
-    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
-    border: 3px solid white;
+    max-width: 90px; /* 既存のスタイル */
+    /* margin-bottom: 20px; /* ← 個別の下マージンは削除し、wrapperで管理 */
+    border-radius: 50%; /* 既存のスタイル */
+    box-shadow: 0 5px 15px rgba(0,0,0,0.1); /* 既存のスタイル */
+    border: 3px solid white; /* 既存のスタイル */
 }
 
-#quizArea p, #resultArea p {
-    font-size: 1.2em;
-    margin-bottom: 18px;
-}
-
-.question-meta {
-    font-size: 0.9em !important;
-    color: #555;
-    margin-bottom: 8px !important;
-}
-
-#questionText {
-    min-height: 60px;
-    font-weight: 700;
-    color: #34495e;
-    margin-bottom: 25px !important;
-}
-
-#answerInput {
-    width: calc(100% - 26px); /* padding and border */
-    padding: 14px;
-    margin-bottom: 20px;
-    border: 1px solid #bdc3c7;
-    border-radius: 8px;
-    font-size: 1em;
-    box-shadow: inset 0 2px 4px rgba(0,0,0,0.06);
-    transition: border-color 0.3s ease, box-shadow 0.3s ease;
-}
-#answerInput:focus {
-    border-color: #5151e5;
-    box-shadow: 0 0 8px rgba(81, 81, 229, 0.3);
-    outline: none;
-}
-
-button {
-    padding: 12px 28px;
-    color: white;
-    border: none;
-    border-radius: 8px;
-    cursor: pointer;
-    font-size: 1.05em;
-    font-weight: 700;
-    letter-spacing: 0.5px;
-    transition: all 0.25s ease;
-    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-    text-transform: uppercase;
-}
-#submitAnswer {
-    background-color: #3498db; /* Blue */
-}
-#submitAnswer:hover {
-    background-color: #2980b9;
-    transform: translateY(-2px);
-    box-shadow: 0 6px 12px rgba(0,0,0,0.15);
-}
-#nextQuestion {
-    background-color: #2ecc71; /* Green */
-    margin-top: 15px;
-}
-#nextQuestion:hover {
-    background-color: #27ae60;
-    transform: translateY(-2px);
-    box-shadow: 0 6px 12px rgba(0,0,0,0.15);
-}
-
-#resultArea {
-    margin-top: 25px;
-    padding: 15px;
-    border-radius: 8px;
-    background-color: #f8f9fa;
-}
-
-#resultText {
-    font-weight: 700;
-    font-size: 1.3em;
-}
-#resultText.correct {
-    color: #2ecc71; /* Green */
-}
-#resultText.incorrect {
-    color: #e74c3c; /* Red */
-}
-#correctAnswerText {
-    color: #555;
-    font-size: 1.1em;
-}
-
-.error-message, #loadingMessage, #quizEndMessage {
-    color: #e74c3c;
+.stats-text {
+    color: red;
     font-weight: bold;
-    margin-top: 20px;
-    font-size: 1.1em;
+    font-size: 1.2em; /* フォントサイズ調整 */
+    margin: 0; /* pタグのデフォルトマージンをリセット */
 }
-#loadingMessage { color: #3498db; }
-#quizEndMessage { color: #2c3e50; font-size: 1.3em; }
+/* ▲▲▲ 追加/変更箇所 ▲▲▲ */
 
-
-.fade-in {
-    animation: fadeIn 0.6s ease-out;
-}
-@keyframes fadeIn {
-    from { opacity: 0; transform: translateY(15px); }
-    to { opacity: 1; transform: translateY(0); }
-}
+/* #quizArea, #questionText, #answerInput, button, #resultArea, #resultText, .error-message など、他のスタイルは変更なし */
