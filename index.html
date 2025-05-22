@@ -9,23 +9,29 @@
 </head>
 <body>
     <div class="container">
-        <h1>研一と学ぶみんはやクイズ</h1>
-        <img src="stone.png" alt="Stone Image" id="stoneImage">
+        <header>
+            <h1>研一と学ぶみんはやクイズ</h1>
+            <img src="stone.png" alt="Stone Image" id="stoneImage">
+        </header>
 
-        <div id="quizArea" style="display:none;">
-            <p id="questionText" class="fade-in"></p>
-            <input type="text" id="answerInput" placeholder="よみがなで答えを入力">
-            <button id="submitAnswer">回答する</button>
-        </div>
+        <main>
+            <div id="quizArea" style="display:none;">
+                <p id="questionNumberText" class="question-meta"></p>
+                <p id="questionText" class="fade-in"></p>
+                <input type="text" id="answerInput" placeholder="よみがなで答えを入力">
+                <button id="submitAnswer">回答する</button>
+            </div>
 
-        <div id="resultArea" style="display:none;">
-            <p id="resultText"></p>
-            <p id="correctAnswerText"></p>
-            <button id="nextQuestion">次の問題へ</button>
-        </div>
+            <div id="resultArea" style="display:none;">
+                <p id="resultText"></p>
+                <p id="correctAnswerText"></p>
+                <button id="nextQuestion">次の問題へ</button>
+            </div>
 
-        <p id="loadingMessage">クイズを読み込み中...</p>
-        <p id="errorMessage" class="error-message"></p>
+            <p id="loadingMessage">クイズを読み込み中...</p>
+            <p id="errorMessage" class="error-message"></p>
+            <p id="quizEndMessage" style="display:none;">クイズ全問終了！お疲れ様でした！</p>
+        </main>
     </div>
 
     <script src="script.js"></script>
