@@ -64,24 +64,45 @@ main { /* For any main specific styles */ }
 /* ▲▲▲ 表示停止位置を示すスタイル ▲▲▲ */
 
 
-/* ▼▼▼ ヒントエリアとボタンのスタイル ▼▼▼ */
-.hint-area {
-    margin-bottom: 15px;
-    display: flex;
-    flex-direction: column; /* ボタンとテキストを縦に並べる */
-    align-items: center;
-    gap: 5px;
+/* ▼▼▼ ヒントエリアコンテナのスタイル (右下隅に固定) ▼▼▼ */
+.hint-area-container {
+    position: fixed;
+    bottom: 15px;
+    right: 15px;
+    z-index: 1050; /* 他の要素より手前に */
+    background-color: #ffffff; /* 背景色 */
+    border: 1px solid #e0e0e0; /* 枠線 */
+    border-radius: 8px; /* 角丸 */
+    padding: 12px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1); /* 影 */
+    width: auto; /* コンテンツに合わせる */
+    min-width: 150px; /* 最小幅 */
+    max-width: 280px; /* 最大幅 */
+    text-align: center; /* ボタンなどを中央揃え */
 }
-#hintButton {
-    /* .utility-button スタイルが適用される */
+
+#hintButton { /* ヒントエリア内のボタンの調整 */
+    display: block; /* 幅いっぱいに広げるか、autoで中央 */
+    margin-left: auto;
+    margin-right: auto;
+    margin-bottom: 8px; /* テキストとの間隔 */
+    padding: 6px 15px !important; /* 少し小さめに */
+    font-size: 0.85em !important;
 }
-.hint-text {
-    font-size: 0.9em !important;
-    color: #2c3e50; /*濃いめの色*/
-    margin-top: 5px !important;
-    margin-bottom: 0 !important; /* 下のマージンを詰める */
-    min-height: 1.2em; /* テキストがないときも高さを確保 */
+
+.hint-text { /* ヒントテキストのスタイル */
+    font-size: 0.85em !important;
+    color: #333; /* 暗めの文字色で見やすく */
+    margin: 0 !important; /* 上下のマージンをリセット */
+    min-height: 1.2em; 
+    word-wrap: break-word;
+    text-align: left; /* ヒント文は左揃え */
 }
+/* ▲▲▲ ヒントエリアコンテナのスタイル ▲▲▲ */
+
+
+
+
 /* ▲▲▲ ヒントエリアとボタンのスタイル ▲▲▲ */
 
 #answerInput { width: calc(100% - 26px); padding: 14px; margin-bottom: 20px; border: 1px solid #bdc3c7; border-radius: 8px; font-size: 1em; box-shadow: inset 0 2px 4px rgba(0,0,0,0.06); transition: border-color 0.3s ease, box-shadow 0.3s ease; }
