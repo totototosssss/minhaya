@@ -307,7 +307,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    // ▼▼▼ ヒント表示チェックボックスのイベントリスナー ▼▼▼
+    
     ui.enableHintCheckbox.addEventListener('change', () => {
         if (ui.enableHintCheckbox.checked) {
             ui.hintAreaContainer.style.display = 'block'; // CSSで指定したデフォルトの表示に戻す
@@ -318,7 +318,7 @@ document.addEventListener('DOMContentLoaded', () => {
             ui.hintAreaContainer.style.display = 'none';
         }
     });
-    // ▲▲▲ ヒント表示チェックボックスのイベントリスナー ▲▲▲
+    
 
 
     initializeQuiz(); 
