@@ -1,164 +1,303 @@
+:root {
+    --bg-main: #f0f4f8; /* 少し明るく清潔感のある背景 */
+    --text-primary: #33475b;
+    --text-secondary: #708090; /* Slate Gray */
+    --text-accent: #1e90ff; /* Dodger Blue */
+    --text-light: #ffffff;
+    
+    /* Neumorphism風シャドウ (ソフトに) */
+    --neumorph-shadow-light: rgba(255, 255, 255, 0.8);
+    --neumorph-shadow-dark: rgba(174, 174, 192, 0.3);
+    --neumorph-shadow-strong-dark: rgba(174, 174, 192, 0.5);
+
+
+    --primary-button-bg: linear-gradient(145deg, #2aa9e0, #1e90ff);
+    --primary-button-hover-bg: linear-gradient(145deg, #1e90ff, #2aa9e0);
+    --correct-bg: #2ed573; /* 明るい緑 */
+    --wrong-bg: #ff4757; /* 明るい赤 */
+
+    --font-body: 'M PLUS Rounded 1c', sans-serif;
+    --font-title: 'Poppins', 'M PLUS Rounded 1c', sans-serif;
+    --font-score: 'Montserrat', 'Poppins', sans-serif; /* スコア用に力強いフォント */
+
+    --border-radius-soft: 20px; /* 全体的に丸みを強く */
+    --border-radius-sharp: 10px;
+    --transition-speed: 0.3s;
+    --transition-fast: 0.2s;
+}
+
+/* (基本的なスタイル、.app-container, .quiz-header, .quiz-content などは前回のものをベースに微調整) */
+/* 以下、変更点や結果表示周りを中心に記載します。完全なCSSは長大になるため、主要部分を抜粋します。 */
+/* 前回のCSSをベースに、以下のセクションを更新・追加してください。 */
+
 body {
-    font-family: 'Noto Sans JP', sans-serif;
+    font-family: var(--font-body);
+    background-color: var(--bg-main);
+    color: var(--text-primary);
     display: flex;
-    flex-direction: column;
+    justify-content: center;
+    align-items: flex-start;
+    min-height: 100vh;
+    padding: 20px;
+    overflow-x: hidden;
+}
+
+.app-container {
+    width: 100%;
+    max-width: 720px; /* 若干スリムに */
+    background-color: var(--bg-main);
+    border-radius: var(--border-radius-soft);
+    box-shadow: 
+        10px 10px 20px var(--neumorph-shadow-dark),
+        -10px -10px 20px var(--neumorph-shadow-light);
+    overflow: hidden;
+}
+
+.quiz-header {
+    padding: 25px 25px 15px;
+    text-align: center;
+    /* border-bottom: 1px solid var(--neumorph-shadow-dark); */
+}
+
+.game-title {
+    font-family: var(--font-title);
+    font-size: 2em; /* 少し調整 */
+    font-weight: 800; /* PoppinsのBold */
+    color: var(--text-primary);
+    margin-bottom: 15px;
+}
+.game-title .game-title-neo { /* ULTIMATEに変更 */
+    background: linear-gradient(45deg, var(--text-accent), #ff6347); /* Tomato */
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    font-weight: 800;
+    margin-left: 8px;
+    font-size: 0.8em;
+}
+
+.progress-text { font-size: 0.9em; font-weight: 700; color: var(--text-secondary); margin-bottom: 6px; }
+.progress-bar-container {
+    height: 10px; /* 少しスリムに */
+    background-color: #d1d9e6;
+    border-radius: var(--border-radius-sharp);
+    box-shadow: inset 2px 2px 3px var(--neumorph-shadow-dark),
+                inset -2px -2px 3px var(--neumorph-shadow-light);
+}
+#progress-bar {
+    background: linear-gradient(90deg, var(--text-accent), #ffc107); /* Yellow */
+}
+
+
+.message-bubble {
+    background-color: var(--bg-main);
+    box-shadow: 
+        6px 6px 12px var(--neumorph-shadow-dark),
+        -6px -6px 12px var(--neumorph-shadow-light);
+    font-size: 1.1em; /* 少し小さくして読みやすく */
+    padding: 18px 22px;
+    border-radius: 18px; /* 丸みを調整 */
+}
+
+.choices-container button {
+    border-radius: var(--border-radius-soft);
+    font-size: 0.9em; /* 少し調整 */
+    font-weight: 700;
+    padding: 14px 8px;
+    box-shadow: 
+        4px 4px 8px var(--neumorph-shadow-dark),
+        -4px -4px 8px var(--neumorph-shadow-light);
+}
+.choices-container button:hover:not(:disabled) {
+    color: var(--text-accent);
+    box-shadow: 
+        3px 3px 6px var(--neumorph-shadow-dark),
+        -3px -3px 6px var(--neumorph-shadow-light),
+        inset 1px 1px 2px var(--neumorph-shadow-dark),
+        inset -1px -1px 2px var(--neumorph-shadow-light);
+}
+.choices-container button:active:not(:disabled) {
+     box-shadow: 
+        inset 3px 3px 6px var(--neumorph-shadow-dark),
+        inset -3px -3px 6px var(--neumorph-shadow-light);
+}
+
+
+.choices-container button.correct { background-color: var(--correct-bg); color: var(--text-light); box-shadow: 0 0 12px var(--correct-bg);}
+.choices-container button.wrong { background-color: var(--wrong-bg); color: var(--text-light); opacity: 0.85; box-shadow: 0 0 10px var(--wrong-bg);}
+.choices-container button.reveal-correct:not(.correct) {
+    border: 2px solid var(--correct-bg); color: var(--correct-bg);
+    box-shadow: 0 0 8px rgba(46, 213, 115, 0.5); /* 影を少しつける */
+}
+
+
+.feedback-text { font-size: 1.1em; } /* 少し小さく */
+
+.action-button { /* 次の問題へ、もう一度挑戦ボタン共通 */
+    padding: 14px 35px; /* 少し大きく */
+    font-size: 1em;
+    border-radius: 50px;
+    box-shadow: 
+        5px 5px 10px var(--neumorph-shadow-dark),
+        -5px -5px 10px var(--neumorph-shadow-light);
+}
+.action-button:hover {
+     box-shadow: 
+        3px 3px 7px var(--neumorph-shadow-dark),
+        -3px -3px 7px var(--neumorph-shadow-light);
+}
+
+
+/* --- 結果表示エリアの超スタイリッシュ化 --- */
+.result-display-area {
+    text-align: center;
+    padding: 30px 20px; /* 上下にもしっかりパディング */
+}
+
+.result-card {
+    background: var(--bg-main);
+    border-radius: var(--border-radius-soft);
+    padding: 30px 25px 40px; /* 下に余白を多めに */
+    box-shadow: 
+        10px 10px 25px var(--neumorph-shadow-strong-dark), /* 影を少し濃く */
+        -10px -10px 25px var(--neumorph-shadow-light);
+    opacity: 0; /* 初期状態は非表示 */
+    transform: translateY(20px); /* 初期状態は少し下に */
+    animation: fadeInSlideUp 0.8s 0.2s ease-out forwards; /* 表示アニメーション */
+}
+
+@keyframes fadeInSlideUp {
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.result-title {
+    font-family: var(--font-title);
+    font-size: 1.3em;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    margin-bottom: 25px;
+    font-weight: 700;
+}
+
+.result-icon-container {
+    margin-bottom: 20px;
+    min-height: 80px; /* アイコン表示スペース */
+    display: flex;
     justify-content: center;
     align-items: center;
-    min-height: 100vh;
-    background: linear-gradient(135deg, #72edf2 10%, #5151e5 100%);
-    margin: 0;
-    padding: 20px;
-    box-sizing: border-box;
-    color: #333;
-    line-height: 1.6;
 }
 
-.container {
-    background-color: rgba(255, 255, 255, 0.97);
-    padding: 30px 45px;
-    border-radius: 15px;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.15);
-    text-align: center;
-    width: 100%;
-    max-width: 700px;
-    transition: transform 0.3s ease-out;
+.result-icon-container .fa-trophy,
+.result-icon-container .fa-medal,
+.result-icon-container .fa-star,
+.result-icon-container .fa-face-smile-beam, /* FontAwesome 6 */
+.result-icon-container .fa-face-meh,       /* FontAwesome 6 */
+.result-icon-container .fa-face-sad-tear  /* FontAwesome 6 */
+ {
+    font-size: 4.5em; /* アイコンサイズ */
+    opacity: 0;
+    transform: scale(0.5);
+    animation: iconPopIn 0.6s ease-out forwards;
+}
+/* アイコンごとの色と遅延アニメーション */
+.result-icon-container.rank-s .fa-trophy { color: #ffd700; animation-delay: 0.5s; } /* Gold */
+.result-icon-container.rank-a .fa-medal { color: #c0c0c0; animation-delay: 0.5s; } /* Silver */
+.result-icon-container.rank-b .fa-star { color: #cd7f32; animation-delay: 0.5s; } /* Bronze Star */
+.result-icon-container.rank-c .fa-face-smile-beam { color: #5cb85c; animation-delay: 0.5s; } /* Green */
+.result-icon-container.rank-d .fa-face-meh { color: #f0ad4e; animation-delay: 0.5s; } /* Orange */
+.result-icon-container.rank-f .fa-face-sad-tear { color: var(--wrong-bg); animation-delay: 0.5s; } /* Red */
+
+
+@keyframes iconPopIn {
+    0% { opacity: 0; transform: scale(0.5) rotate(-15deg); }
+    60% { opacity: 1; transform: scale(1.1) rotate(5deg); }
+    100% { opacity: 1; transform: scale(1) rotate(0deg); }
 }
 
-header { margin-bottom: 15px; }
-h1 { color: #2c3e50; margin-bottom: 15px; font-weight: 700; font-size: 2em; }
-.image-stats-wrapper { display: flex; align-items: center; justify-content: center; gap: 15px; margin-bottom: 10px; }
-#stoneImage { max-width: 90px; border-radius: 50%; box-shadow: 0 5px 15px rgba(0,0,0,0.1); border: 3px solid white; }
-.stats-text { color: red; font-weight: bold; font-size: 1.2em; margin: 0; }
 
-.controls-wrapper {
-    margin-top: 10px;
+.result-rank-title {
+    font-family: var(--font-title);
+    font-size: 2em; /* 称号を大きく */
+    font-weight: 800; /* Poppins ExtraBold */
+    margin-bottom: 10px;
+    color: var(--text-primary);
+    opacity: 0;
+    animation: textFadeIn 0.5s 0.8s ease-out forwards;
+}
+/* ランクごとの色 */
+.result-rank-title.rank-s { color: #e67e22; } /* オレンジ系 */
+.result-rank-title.rank-a { color: var(--text-accent); }
+/* 他のランクはデフォルトカラー */
+
+
+.final-score-container {
     margin-bottom: 20px;
-    font-size: 0.9em;
-    color: #555;
-    display: flex; /* コントロール類を横並びにする場合 */
-    flex-direction: column; /* または縦並びのまま */
-    align-items: center; /* 中央揃え */
-    gap: 10px; /* 各コントロール間の隙間 */
+    opacity: 0;
+    animation: textFadeIn 0.5s 1s ease-out forwards;
 }
-.feature-toggle {
-    /* margin-bottom: 10px; は controls-wrapper の gap で代替可能 */
-}
-.feature-toggle input[type="checkbox"] { margin-right: 5px; vertical-align: middle; }
-.feature-toggle label { vertical-align: middle; cursor: pointer; }
-.speed-control { display: flex; align-items: center; justify-content: center; gap: 8px; font-size: 0.95em; }
-.speed-control label { white-space: nowrap; }
-.speed-control input[type="range"] { width: 120px; vertical-align: middle; }
-.speed-value { min-width: 50px; text-align: left; font-weight: bold; }
-
-main { /* For any main specific styles */ }
-#quizArea { margin-bottom: 20px; }
-#quizArea p, #resultArea p { font-size: 1.2em; margin-bottom: 18px; }
-.question-meta { font-size: 0.9em !important; color: #555; margin-bottom: 8px !important; }
-#questionText { min-height: 80px; font-weight: 700; color: #34495e; margin-bottom: 15px !important; white-space: pre-wrap; line-height: 1.7; text-align: left; padding: 5px; border: 1px solid transparent; }
-.stopped-text-segment { background-color: rgba(255, 220, 100, 0.4); padding: 0 2px; border-radius: 2px; }
-
-#answerInput { width: calc(100% - 26px); padding: 14px; margin-bottom: 20px; border: 1px solid #bdc3c7; border-radius: 8px; font-size: 1em; box-shadow: inset 0 2px 4px rgba(0,0,0,0.06); transition: border-color 0.3s ease, box-shadow 0.3s ease; }
-#answerInput:focus { border-color: #5151e5; box-shadow: 0 0 8px rgba(81, 81, 229, 0.3); outline: none; }
-button { padding: 12px 28px; color: white; border: none; border-radius: 8px; cursor: pointer; font-size: 1.05em; font-weight: 700; letter-spacing: 0.5px; transition: all 0.25s ease; box-shadow: 0 4px 8px rgba(0,0,0,0.1); text-transform: uppercase; margin: 5px; }
-#submitAnswer { background-color: #3498db; }
-#submitAnswer:hover { background-color: #2980b9; transform: translateY(-2px); box-shadow: 0 6px 12px rgba(0,0,0,0.15); }
-#nextQuestion { background-color: #2ecc71; }
-#nextQuestion:hover { background-color: #27ae60; transform: translateY(-2px); box-shadow: 0 6px 12px rgba(0,0,0,0.15); }
-#disputeButton { background-color: #f39c12; font-size: 0.9em; padding: 10px 20px; }
-#disputeButton:hover { background-color: #e67e22; transform: translateY(-2px); box-shadow: 0 6px 12px rgba(0,0,0,0.15); }
-.utility-button { background-color: #95a5a6; font-size: 0.9em !important; padding: 8px 18px !important; text-transform: none !important; letter-spacing: normal !important; }
-.utility-button:hover { background-color: #7f8c8d; transform: translateY(-2px); box-shadow: 0 6px 12px rgba(0,0,0,0.15); }
-#stopSlowDisplayTextButton { display: block; margin-left: auto; margin-right: auto; margin-bottom: 15px; }
-
-.hint-area-container {
-    position: fixed;
-    bottom: 15px;
-    right: 15px;
-    z-index: 1050;
-    background-color: #ffffff;
-    border: 1px solid #e0e0e0;
-    border-radius: 8px;
-    padding: 12px;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-    width: auto;
-    min-width: 150px;
-    max-width: 280px;
-    text-align: center;
-    /* display: block; /* 初期表示はJSで制御 */
-}
-#hintButton {
+.score-label-final {
+    font-size: 0.8em;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 1px;
     display: block;
-    margin-left: auto;
-    margin-right: auto;
-    margin-bottom: 8px;
-    padding: 6px 15px !important;
-    font-size: 0.85em !important;
+    margin-bottom: -5px; /* スコアとの間を詰める */
 }
-.hint-text {
-    font-size: 0.85em !important;
-    color: #333;
-    margin: 0 !important;
-    min-height: 1.2em; 
-    word-wrap: break-word;
-    text-align: left;
+#final-score-value {
+    font-family: var(--font-score);
+    font-size: 4.5em; /* スコアを特大に */
+    font-weight: 800; /* Montserrat ExtraBold */
+    color: var(--text-primary);
+    line-height: 1;
+    /* カウントアップアニメーションはJSで制御 */
+}
+.total-questions-final {
+    font-family: var(--font-score);
+    font-size: 1.5em;
+    font-weight: 700;
+    color: var(--text-secondary);
+    margin-left: 5px;
 }
 
-#resultArea { margin-top: 25px; padding: 15px; border-radius: 8px; background-color: #f8f9fa; }
-#resultText { font-weight: 700; font-size: 1.3em; }
-#resultText.correct { color: #2ecc71; }
-#resultText.incorrect { color: #e74c3c; }
-#correctAnswerText { color: #555; font-size: 1.1em; }
-.error-message, #loadingMessage, #quizEndMessage { font-weight: bold; margin-top: 20px; font-size: 1.1em; }
-#loadingMessage { color: #3498db; }
-#errorMessage { color: #e74c3c; }
-#quizEndMessage { color: #2c3e50; font-size: 1.3em; }
-.fade-in { animation: fadeIn 0.6s ease-out; }
-@keyframes fadeIn { from { opacity: 0; transform: translateY(15px); } to { opacity: 1; transform: translateY(0); } }
-
-
-
-
-
-
-
-
-
-/* ▼▼▼ YouTube動画埋め込みスタイル ▼▼▼ */
-.youtube-embed-wrapper {
-    text-align: center; /* iframe自体を中央に */
-    margin-top: 100px;   /* クイズコンテナとの間隔 */
-    margin-bottom: 50px; /* ページ最下部との間隔 */
-    padding: 0 10px; /* 左右のパディング */
-    width: 100%;
-    box-sizing: border-box;
+.result-message {
+    font-size: 1.05em;
+    color: var(--text-secondary);
+    line-height: 1.6;
+    min-height: 3em; /* メッセージ表示スペース */
+    margin-bottom: 30px;
+    padding: 0 10px; /* 長文でも読みやすく */
+    opacity: 0;
+    animation: textFadeIn 0.5s 1.2s ease-out forwards;
 }
-.youtube-embed-wrapper h2 {
-    font-size: 1.2em;
-    color: #fff; /* 背景が暗いことを想定して白文字に */
-    margin-bottom: 15px;
-    text-shadow: 1px 1px 2px rgba(0,0,0,0.5); /* 文字を読みやすく */
+
+@keyframes textFadeIn {
+    to { opacity: 1; }
 }
-.video-responsive-container {
-    position: relative;
-    overflow: hidden;
-    width: 100%;
-    max-width: 560px; /* YouTube標準の幅を最大幅に */
-    margin: 0 auto; /* ラッパー内で中央に配置 */
-    background-color: #000; /* iframeの背景が透けないように */
-    border-radius: 8px;
-    box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+
+.result-display-area .restart-button {
+    opacity: 0;
+    transform: translateY(10px);
+    animation: buttonFadeInSlideUp 0.5s 1.5s ease-out forwards;
+    background: var(--primary-button-bg); /* 結果画面のボタンはグラデーション強めに */
 }
-.video-responsive-container::after {
-    display: block;
-    content: "";
-    padding-top: 56.25%; /* 16:9 アスペクト比 */
+@keyframes buttonFadeInSlideUp {
+    to { opacity: 1; transform: translateY(0); }
 }
-.video-responsive-container iframe {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    border: 0; /* iframeのデフォルトボーダーを削除 */
+
+/* スマホ表示時の調整 */
+@media (max-width: 480px) {
+    .result-card { padding: 20px 15px 30px; }
+    .result-icon-container .fa-trophy, /* 他のアイコンも同様 */
+    .result-icon-container .fa-medal,
+    .result-icon-container .fa-star,
+    .result-icon-container .fa-face-smile-beam,
+    .result-icon-container .fa-face-meh,
+    .result-icon-container .fa-face-sad-tear { font-size: 3.5em; }
+    .result-rank-title { font-size: 1.6em; }
+    #final-score-value { font-size: 3.5em; }
+    .total-questions-final { font-size: 1.2em; }
+    .result-message { font-size: 0.95em; }
 }
-/* ▲▲▲ YouTube動画埋め込みスタイル ▲▲▲ */
