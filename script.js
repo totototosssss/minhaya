@@ -1,325 +1,252 @@
 document.addEventListener('DOMContentLoaded', () => {
-    const ui = {
-        questionNumberText: document.getElementById('questionNumberText'),
-        questionText: document.getElementById('questionText'),
-        answerInput: document.getElementById('answerInput'),
-        submitAnswer: document.getElementById('submitAnswer'),
-        resultText: document.getElementById('resultText'),
-        correctAnswerText: document.getElementById('correctAnswerText'),
-        nextQuestion: document.getElementById('nextQuestion'),
-        loadingMessage: document.getElementById('loadingMessage'),
-        errorMessage: document.getElementById('errorMessage'),
-        quizEndMessage: document.getElementById('quizEndMessage'),
-        quizArea: document.getElementById('quizArea'),
-        resultArea: document.getElementById('resultArea'),
-        correctRateText: document.getElementById('correctRateText'),
-        disputeButton: document.getElementById('disputeButton'),
-        enableSlowDisplayTextCheckbox: document.getElementById('enableSlowDisplayTextCheckbox'),
-        stopSlowDisplayTextButton: document.getElementById('stopSlowDisplayTextButton'),
-        speedControlArea: document.getElementById('speedControlArea'),
-        slowDisplayTextSpeedSlider: document.getElementById('slowDisplayTextSpeedSlider'),
-        speedValueDisplay: document.getElementById('speedValueDisplay'),
-        hintButton: document.getElementById('hintButton'),
-        hintTextDisplay: document.getElementById('hintTextDisplay'),
-        // ▼▼▼ UI要素追加 ▼▼▼
-        enableHintCheckbox: document.getElementById('enableHintCheckbox'),
-        hintAreaContainer: document.querySelector('.hint-area-container')
-        // ▲▲▲ UI要素追加 ▲▲▲
-    };
+    // DOM要素の取得 (HTMLのidに合わせて調整)
+    const messageTextElement = document.getElementById('message-text');
+    const choicesAreaElement = document.getElementById('choices-area');
+    const feedbackTextElement = document.getElementById('feedback-text');
+    const nextQuestionBtn = document.getElementById('next-question-btn');
+    const quizAreaElement = document.getElementById('quiz-area');
+    const resultAreaElement = document.getElementById('result-area');
+    // const scoreElement = document.getElementById('score'); // result-card内の新しい要素で表示
+    // const totalQuestionsElement = document.getElementById('total-questions'); // 同上
+    const restartBtn = document.getElementById('restart-btn');
+    const progressBarElement = document.getElementById('progress-bar');
+    const progressTextElement = document.getElementById('progress-text');
+    // const scorePercentageElement = document.getElementById('score-percentage'); // 不要なら削除
 
-    const CSV_FILE_PATH = 'みんはや問題リストv1.27 - 問題リスト.csv';
-    const COLUMN_INDICES = { QUESTION: 0, DISPLAY_ANSWER: 1, READING_ANSWER: 2 };
-
-    let quizzes = [];
-    let currentQuestionIndex = 0;
-    let totalQuestions = 0;
-    let correctAnswers = 0;
-    let questionsAttempted = 0;
-    let lastAnswerWasInitiallyIncorrect = false;
+    // 結果表示用
+    const resultIconContainer = document.getElementById('result-icon-container');
+    const resultRankTitleElement = document.getElementById('result-rank-title');
+    const finalScoreValueElement = document.getElementById('final-score-value');
+    const totalQuestionsOnResultElement = document.getElementById('total-questions-on-result');
+    const resultMessageElement = document.getElementById('result-message');
     
-    let slowDisplayTextIntervalId = null;
-    let currentQuestionFullText = '';
-    let currentDisplayedCharIndex = 0;
-    let stoppedAtIndex = -1;
+    // const confettiCanvas = document.getElementById('confetti-canvas'); // HTMLにcanvasタグを追加
 
-    function shuffleArray(array) {
-        for (let i = array.length - 1; i > 0; i--) {
-            const j = Math.floor(Math.random() * (i + 1));
-            [array[i], array[j]] = [array[j], array[i]];
-        }
-    }
-
-    function initializeQuiz() {
-        const useSlowRead = window.confirm("問題文を徐々に表示する機能を使用しますか?");
-        ui.enableSlowDisplayTextCheckbox.checked = useSlowRead;
-        if (useSlowRead) {
-            ui.speedControlArea.style.display = 'flex';
-        } else {
-            ui.speedControlArea.style.display = 'none';
-        }
-        ui.speedValueDisplay.textContent = `${ui.slowDisplayTextSpeedSlider.value}ms`;
-
-        // ▼▼▼ ヒント表示の初期設定 ▼▼▼
-        if (ui.enableHintCheckbox.checked) {
-            ui.hintAreaContainer.style.display = 'block'; // または 'flex' など適切な値
-        } else {
-            ui.hintAreaContainer.style.display = 'none';
-        }
-        // ▲▲▲ ヒント表示の初期設定 ▲▲▲
-
-        loadQuizData();
-    }
+    let allQuizData = []; // 全てのロードされたクイズデータ
+    let currentQuizSet = []; // 現在の10問（またはそれ以下）のセット
+    let currentQuestionIndex = 0;
+    let score = 0;
+    const TARGET_NUM_QUESTIONS = 10; // 目標問題数
 
     async function loadQuizData() {
         try {
-            ui.loadingMessage.style.display = 'block';
-            ui.errorMessage.style.display = 'none';
-            ui.quizArea.style.display = 'none';
-            ui.correctRateText.textContent = '正答率: ---';
-
-            const response = await fetch(CSV_FILE_PATH);
-            if (!response.ok) throw new Error(`CSVファイル読み込みエラー (${response.status})`);
-            let csvText = await response.text();
-            if (csvText.startsWith('\uFEFF')) csvText = csvText.substring(1);
-            const lines = csvText.trim().split(/\r?\n/);
-            if (lines.length <= 1) throw new Error('CSVファイルにデータがありません。');
-
-            quizzes = lines.slice(1).map(line => {
-                const parts = line.split(',');
-                const question = parts[COLUMN_INDICES.QUESTION]?.trim();
-                const displayAnswer = parts[COLUMN_INDICES.DISPLAY_ANSWER]?.trim();
-                const readingAnswer = parts[COLUMN_INDICES.READING_ANSWER]?.trim();
-                if (question && readingAnswer) return { question, displayAnswer: displayAnswer || readingAnswer, readingAnswer };
-                return null;
-            }).filter(quiz => quiz); 
-
-            if (quizzes.length === 0) throw new Error('有効なクイズが見つかりませんでした。');
-            shuffleArray(quizzes); 
-            totalQuestions = quizzes.length;
-            currentQuestionIndex = 0; correctAnswers = 0; questionsAttempted = 0;
-
-            ui.loadingMessage.style.display = 'none';
-            ui.quizArea.style.display = 'block';
-            displayQuestion();
+            const response = await fetch('quiz_data.json');
+            if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+            allQuizData = await response.json(); // まず全データ読み込み
+            
+            if (allQuizData.length === 0) {
+                displayError("クイズデータがありません。txtファイルから問題が生成されなかったようです。");
+                return;
+            }
+            prepareNewQuizSet(); // 最初のクイズセットを準備
+            startGame();
         } catch (error) {
-            console.error('読み込みエラー:', error);
-            ui.loadingMessage.style.display = 'none';
-            ui.errorMessage.textContent = `エラー: ${error.message}`;
-            ui.errorMessage.style.display = 'block';
+            console.error("クイズデータの読み込みに失敗:", error);
+            displayError("クイズデータの読み込みに失敗しました。ファイルを確認してください。");
+        }
+    }
+
+    function prepareNewQuizSet() {
+        let shuffledData = shuffleArray([...allQuizData]); // 全データからシャッフルしてコピー
+        currentQuizSet = shuffledData.slice(0, TARGET_NUM_QUESTIONS); // 10問をスライス
+        if (currentQuizSet.length === 0 && allQuizData.length > 0) {
+            // フィルターなどで10問に満たなくても、元データがあれば少なくとも1問は出題試みる
+             currentQuizSet = shuffledData.slice(0, allQuizData.length); 
         }
     }
     
-    function onSlowDisplayNaturalFinish() {
-        if(slowDisplayTextIntervalId) clearInterval(slowDisplayTextIntervalId);
-        slowDisplayTextIntervalId = null;
-        stoppedAtIndex = -1; 
-        ui.stopSlowDisplayTextButton.style.display = 'none';
-        ui.answerInput.disabled = false;
-        ui.submitAnswer.disabled = false;
-        ui.answerInput.focus();
-    }
+    function displayError(message) { /* 前回同様 */ }
 
-    function stopProgressiveDisplayAndEnableInput() {
-        if (slowDisplayTextIntervalId) {
-            clearInterval(slowDisplayTextIntervalId);
-            slowDisplayTextIntervalId = null;
-            stoppedAtIndex = currentDisplayedCharIndex; 
+    function startGame() {
+        currentQuestionIndex = 0;
+        score = 0;
+        
+        // アニメーションリセットのため、一度非表示にしてから表示
+        resultAreaElement.style.display = 'none';
+        const resultCard = document.querySelector('.result-card');
+        if(resultCard) {
+            resultCard.style.opacity = '0';
+            resultCard.style.transform = 'translateY(20px)';
         }
-        ui.stopSlowDisplayTextButton.style.display = 'none';
-        ui.answerInput.disabled = false;
-        ui.submitAnswer.disabled = false;
-        ui.answerInput.focus();
-    }
-
-    function startOrRestartSlowDisplayInterval() {
-        if (slowDisplayTextIntervalId) { clearInterval(slowDisplayTextIntervalId); }
-        const displaySpeedMs = parseInt(ui.slowDisplayTextSpeedSlider.value, 10);
-        if (currentDisplayedCharIndex >= currentQuestionFullText.length) {
-            onSlowDisplayNaturalFinish(); 
+        
+        quizAreaElement.style.display = 'block';
+        nextQuestionBtn.style.display = 'none';
+        feedbackTextElement.textContent = '';
+        feedbackTextElement.className = 'feedback-text'; 
+        
+        if (currentQuizSet.length === 0) {
+            displayError("出題できるクイズがありません。");
             return;
         }
-        slowDisplayTextIntervalId = setInterval(() => {
-            if (currentDisplayedCharIndex < currentQuestionFullText.length) {
-                ui.questionText.textContent += currentQuestionFullText[currentDisplayedCharIndex];
-                currentDisplayedCharIndex++;
-            } else {
-                onSlowDisplayNaturalFinish();
-            }
-        }, displaySpeedMs);
+        
+        updateProgress();
+        displayQuestion();
     }
 
     function displayQuestion() {
-        ui.resultArea.style.display = 'none';
-        ui.quizEndMessage.style.display = 'none';
-        ui.questionText.classList.remove('fade-in');
-        void ui.questionText.offsetWidth; 
-        ui.disputeButton.style.display = 'none';
-        lastAnswerWasInitiallyIncorrect = false;
-        stoppedAtIndex = -1;
+        if (currentQuestionIndex < currentQuizSet.length) {
+            const currentQuestion = currentQuizSet[currentQuestionIndex];
+            messageTextElement.innerHTML = currentQuestion.message.replace(/\n/g, '<br>');
+            choicesAreaElement.innerHTML = ''; 
 
-        if (slowDisplayTextIntervalId) { clearInterval(slowDisplayTextIntervalId); slowDisplayTextIntervalId = null; }
-        ui.stopSlowDisplayTextButton.style.display = 'none';
-
-        // ▼▼▼ ヒント表示のリセットと表示状態の制御 ▼▼▼
-        ui.hintTextDisplay.textContent = '';
-        ui.hintTextDisplay.style.display = 'none'; 
-        ui.hintButton.disabled = false;
-        // ヒントコンテナ自体の表示はチェックボックスに連動させるので、ここではボタンの表示のみ制御
-        if (ui.enableHintCheckbox.checked) {
-            ui.hintButton.style.display = 'block'; // hintAreaContainerがblockなら、その中のボタンもblockに
+            currentQuestion.choices.forEach(choice => {
+                const button = document.createElement('button');
+                button.textContent = choice;
+                button.addEventListener('click', () => handleAnswer(choice, currentQuestion.answer));
+                choicesAreaElement.appendChild(button);
+            });
+            feedbackTextElement.textContent = '';
+            feedbackTextElement.className = 'feedback-text';
+            nextQuestionBtn.style.display = 'none';
         } else {
-            ui.hintButton.style.display = 'none'; // チェックが外れていればボタンも隠す
-        }
-        // ▲▲▲ ヒント表示のリセットと表示状態の制御 ▲▲▲
-
-        if (currentQuestionIndex < totalQuestions) {
-            const currentQuiz = quizzes[currentQuestionIndex];
-            currentQuestionFullText = currentQuiz.question;
-            currentDisplayedCharIndex = 0;
-            ui.questionText.textContent = ''; 
-            ui.questionText.innerHTML = ''; 
-
-            ui.questionNumberText.textContent = `第${currentQuestionIndex + 1}問`;
-            
-            if (ui.enableSlowDisplayTextCheckbox.checked) {
-                ui.answerInput.disabled = true;
-                ui.submitAnswer.disabled = true;
-                ui.stopSlowDisplayTextButton.style.display = 'block';
-                startOrRestartSlowDisplayInterval();
-            } else {
-                ui.questionText.textContent = currentQuestionFullText;
-                ui.answerInput.disabled = false;
-                ui.submitAnswer.disabled = false;
-            }
-            
-            ui.answerInput.value = '';
-            if (!ui.enableSlowDisplayTextCheckbox.checked || !slowDisplayTextIntervalId) { 
-                 ui.answerInput.focus();
-            }
-            ui.submitAnswer.style.display = 'inline-block';
-            ui.nextQuestion.style.display = 'none';
-            ui.questionText.classList.add('fade-in');
-        } else {
-            ui.quizArea.style.display = 'none';
-            ui.resultArea.style.display = 'none';
-            ui.quizEndMessage.style.display = 'block';
-            ui.hintAreaContainer.style.display = 'none'; // ▼▼▼ クイズ終了時はヒントエリア全体を隠す ▼▼▼
+            showResults();
         }
     }
 
-    function updateCorrectRateDisplay() {
-        let rate = 0; if (questionsAttempted > 0) rate = Math.round((correctAnswers / questionsAttempted) * 100); ui.correctRateText.textContent = `正答率: ${rate}%`;
+    function handleAnswer(selectedChoice, correctAnswer) { /* 前回同様のロジック、紙吹雪もOK */
+        const buttons = choicesAreaElement.getElementsByTagName('button');
+        let selectedButtonElement = null;
+
+        for (let btn of buttons) {
+            btn.disabled = true;
+            if (btn.textContent === selectedChoice) selectedButtonElement = btn;
+            if (btn.textContent === correctAnswer) btn.classList.add('reveal-correct');
+        }
+
+        if (selectedChoice === correctAnswer) {
+            score++;
+            feedbackTextElement.textContent = "正解！🎉";
+            feedbackTextElement.className = 'feedback-text correct';
+            if (selectedButtonElement) {
+                selectedButtonElement.classList.remove('reveal-correct');
+                selectedButtonElement.classList.add('correct');
+            }
+            if (typeof confetti === 'function') {
+                confetti({ particleCount: 80, spread: 60, origin: { y: 0.7 } });
+            }
+        } else {
+            feedbackTextElement.textContent = `残念！正解は「${correctAnswer}」でした。`;
+            feedbackTextElement.className = 'feedback-text wrong';
+            if (selectedButtonElement) selectedButtonElement.classList.add('wrong');
+        }
+        nextQuestionBtn.style.display = 'inline-flex';
     }
 
-    function checkAnswer() {
-        if (currentQuestionIndex >= totalQuestions) return;
-        if (slowDisplayTextIntervalId) {
-            clearInterval(slowDisplayTextIntervalId);
-            slowDisplayTextIntervalId = null;
-            if (stoppedAtIndex === -1) stoppedAtIndex = currentDisplayedCharIndex; 
-        }
-
-        questionsAttempted++; 
-        const userAnswer = ui.answerInput.value.trim();
-        const currentQuiz = quizzes[currentQuestionIndex];
-        const isCorrect = userAnswer === currentQuiz.readingAnswer;
-        lastAnswerWasInitiallyIncorrect = false;
-
-        if (isCorrect) {
-            correctAnswers++; 
-            ui.resultText.textContent = '正解！ 🎉';
-            ui.resultText.className = 'correct';
-            ui.disputeButton.style.display = 'none';
+    function updateProgress() {
+        const totalQuestionsInSet = currentQuizSet.length;
+        if (totalQuestionsInSet > 0) {
+            // currentQuestionIndex は 0 から始まるので、表示上は +1 する
+            // プログレスバーは完了度合いなので、次の問題に進むときに更新するのが自然
+            // 最初の問題表示時は (0 / total) * 100 = 0% から始まる
+            // 最後の問題回答後は (total / total) * 100 = 100%
+            const completedPercentage = (currentQuestionIndex / totalQuestionsInSet) * 100;
+            progressBarElement.style.width = `${completedPercentage}%`;
+            progressTextElement.textContent = `問題 ${currentQuestionIndex + 1} / ${totalQuestionsInSet}`;
         } else {
-            ui.resultText.textContent = '不正解... 😢';
-            ui.resultText.className = 'incorrect';
-            ui.disputeButton.style.display = 'inline-block';
-            lastAnswerWasInitiallyIncorrect = true;
+            progressBarElement.style.width = `0%`;
+            progressTextElement.textContent = `問題 - / -`;
         }
-        updateCorrectRateDisplay();
-        let correctAnswerFormatted = `「${currentQuiz.readingAnswer}」`;
-        if (currentQuiz.displayAnswer && currentQuiz.displayAnswer !== currentQuiz.readingAnswer) {
-            correctAnswerFormatted = `「${currentQuiz.readingAnswer} (${currentQuiz.displayAnswer})」`;
-        }
-        ui.correctAnswerText.textContent = isCorrect ? '' : `正解は ${correctAnswerFormatted} です。`;
+    }
+
+    function showResults() {
+        quizAreaElement.style.display = 'none';
+        resultAreaElement.style.display = 'block';
         
-        ui.questionText.textContent = currentQuestionFullText; // まず全文表示
-        if (stoppedAtIndex > 0 && stoppedAtIndex < currentQuestionFullText.length) {
-            const preText = currentQuestionFullText.substring(0, stoppedAtIndex);
-            const postText = currentQuestionFullText.substring(stoppedAtIndex);
-            ui.questionText.innerHTML = `<span class="stopped-text-segment">${preText}</span>${postText}`;
-        }
+        const totalAnswered = currentQuizSet.length;
+        totalQuestionsOnResultElement.textContent = totalAnswered;
 
-        ui.answerInput.disabled = true;
-        ui.submitAnswer.disabled = true;
-        ui.nextQuestion.style.display = 'inline-block';
-        ui.resultArea.style.display = 'block';
-        ui.nextQuestion.focus(); 
-    }
+        // スコアに応じた称号とメッセージ、アイコン
+        let rank = '';
+        let rankTitle = '';
+        let message = '';
+        let iconClass = '';
 
-    function handleDispute() {
-        if (!lastAnswerWasInitiallyIncorrect) return; correctAnswers++; updateCorrectRateDisplay(); ui.resultText.textContent = '判定変更　🤡'; ui.resultText.className = 'correct'; ui.disputeButton.style.display = 'none'; lastAnswerWasInitiallyIncorrect = false;
-    }
-    
-    function handleHintClick() {
-        if (currentQuestionIndex < totalQuestions) {
-            const correctAnswerReading = quizzes[currentQuestionIndex].readingAnswer;
-            if (correctAnswerReading && correctAnswerReading.length > 0) {
-                const firstChar = correctAnswerReading[0];
-                const length = correctAnswerReading.length;
-                ui.hintTextDisplay.textContent = `ヒント: 最初の1文字「${firstChar}」(${length}文字)`;
-                ui.hintTextDisplay.style.display = 'block';
-                ui.hintButton.disabled = true; 
+        const percentage = totalAnswered > 0 ? (score / totalAnswered) * 100 : 0;
+
+        if (score === totalAnswered && totalAnswered > 0) { // パーフェクト
+            rank = 's';
+            rankTitle = "トーク神認定！";
+            message = "中毒お疲れ🤡";
+            iconClass = 'fas fa-trophy';
+            if (typeof confetti === 'function') { // 豪華な紙吹雪
+                setTimeout(() => { // カード表示アニメーションと被らないように少し遅延
+                     confetti({ particleCount: 250, spread: 180, origin: { y: 0.3 }, zIndex: 10000 });
+                }, 600);
             }
+        } else if (percentage >= 80) {
+            rank = 'a';
+            rankTitle = "トークマスター";
+            message = "素晴らしい！ほとんどの発言を見抜きましたね！";
+            iconClass = 'fas fa-medal';
+        } else if (percentage >= 60) {
+            rank = 'b';
+            rankTitle = "トークエキスパート";
+            message = "なかなかの洞察力！もっと上を目指しましょう！";
+            iconClass = 'fas fa-star';
+        } else if (percentage >= 40) {
+            rank = 'c';
+            rankTitle = "トークチャレンジャー";
+            message = "いい線いってます！次はもっと多くの正解を！";
+            iconClass = 'fas fa-face-smile-beam';
+        } else if (percentage >= 20) {
+            rank = 'd';
+            rankTitle = "トーク見習い";
+            message = "まだ伸びしろ十分！再挑戦で感覚を掴もう！";
+            iconClass = 'fas fa-face-meh';
+        } else {
+            rank = 'f';
+            rankTitle = "トークのたまご";
+            message = "残念！めげずにもう一度トライしてみよう！";
+            iconClass = 'fas fa-face-sad-tear';
         }
+        
+        resultIconContainer.className = `result-icon-container rank-${rank}`; // アイコンの色分け用
+        resultIconContainer.innerHTML = `<i class="${iconClass}"></i>`;
+        resultRankTitleElement.textContent = rankTitle;
+        resultRankTitleElement.className = `result-rank-title rank-${rank}`;
+        resultMessageElement.textContent = message;
+
+        // スコアカウントアップアニメーション
+        animateValue(finalScoreValueElement, 0, score, 800);
+
+        progressBarElement.style.width = '100%';
+        progressTextElement.textContent = `全 ${totalAnswered} 問完了！`;
+    }
+    
+    function animateValue(element, start, end, duration) {
+        let startTimestamp = null;
+        const step = (timestamp) => {
+            if (!startTimestamp) startTimestamp = timestamp;
+            const progress = Math.min((timestamp - startTimestamp) / duration, 1);
+            element.textContent = Math.floor(progress * (end - start) + start);
+            if (progress < 1) {
+                window.requestAnimationFrame(step);
+            }
+        };
+        window.requestAnimationFrame(step);
     }
 
-    // Event Listeners
-    ui.submitAnswer.addEventListener('click', checkAnswer);
-    ui.answerInput.addEventListener('keypress', e => { if (e.key === 'Enter' && !ui.answerInput.disabled) checkAnswer(); });
-    ui.nextQuestion.addEventListener('click', () => { currentQuestionIndex++; displayQuestion(); });
-    ui.disputeButton.addEventListener('click', handleDispute);
-    ui.stopSlowDisplayTextButton.addEventListener('click', stopProgressiveDisplayAndEnableInput);
-    ui.hintButton.addEventListener('click', handleHintClick);
 
-    ui.enableSlowDisplayTextCheckbox.addEventListener('change', () => {
-        if (ui.enableSlowDisplayTextCheckbox.checked) {
-            ui.speedControlArea.style.display = 'flex';
+    function shuffleArray(array) { /* 前回同様 */ }
+    document.getElementById('current-year').textContent = new Date().getFullYear();
+
+    nextQuestionBtn.addEventListener('click', () => {
+        currentQuestionIndex++;
+        if (currentQuestionIndex < currentQuizSet.length) {
+            displayQuestion();
+            updateProgress(); 
         } else {
-            ui.speedControlArea.style.display = 'none';
-            if (slowDisplayTextIntervalId) { 
-                clearInterval(slowDisplayTextIntervalId);
-                slowDisplayTextIntervalId = null;
-                ui.questionText.textContent = currentQuestionFullText;
-                ui.stopSlowDisplayTextButton.style.display = 'none';
-                ui.answerInput.disabled = false;
-                ui.submitAnswer.disabled = false;
-                if (currentQuestionIndex < totalQuestions) ui.answerInput.focus();
-            }
+            // 最後の問題のプログレスバーを100%にする
+            progressBarElement.style.width = '100%';
+            progressTextElement.textContent = `結果を計算中...`; // or `全 ${currentQuizSet.length} 問完了！`
+            showResults();
         }
     });
 
-    ui.slowDisplayTextSpeedSlider.addEventListener('input', () => {
-        const newSpeed = ui.slowDisplayTextSpeedSlider.value;
-        ui.speedValueDisplay.textContent = `${newSpeed}ms`;
-        if (slowDisplayTextIntervalId) { 
-            startOrRestartSlowDisplayInterval(); 
-        }
-    });
-
-    
-    ui.enableHintCheckbox.addEventListener('change', () => {
-        if (ui.enableHintCheckbox.checked) {
-            ui.hintAreaContainer.style.display = 'block'; // CSSで指定したデフォルトの表示に戻す
-             if(currentQuestionIndex < totalQuestions) { // クイズ中ならヒントボタンも表示
-                ui.hintButton.style.display = 'block';
-             }
-        } else {
-            ui.hintAreaContainer.style.display = 'none';
-        }
+    restartBtn.addEventListener('click', () => {
+        prepareNewQuizSet(); // 新しい10問セットを準備
+        startGame();
     });
     
-
-
-    initializeQuiz(); 
+    loadQuizData();
 });
