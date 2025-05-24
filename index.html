@@ -3,74 +3,63 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>研一と学ぶ　みんはや</title>
-    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;700&display=swap" rel="stylesheet">
+    <title>誰の発言でしょう？ ULTIMATE</title> <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=M+PLUS+Rounded+1c:wght@400;700;800&family=Poppins:wght@600;700;800&family=Montserrat:wght@700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <div class="container">
-        <header>
-            <h1>研一と学ぶ　みんはや</h1>
-            <div class="image-stats-wrapper">
-                <img src="stone.png" alt="Stone Image" id="stoneImage">
-                <p id="correctRateText" class="stats-text">正答率: ---</p>
+    <div class="app-container">
+        <header class="quiz-header">
+            <h1 class="game-title"><span>誰の</span><span>発言</span><span>でしょう？</span><span class="game-title-neo">ULTIMATE</span></h1>
+            <div class="progress-info">
+                <div id="progress-text" class="progress-text">問題 1 / 10</div>
+                <div class="progress-bar-container">
+                    <div id="progress-bar" class="progress-bar"></div>
+                </div>
             </div>
-            <div class="controls-wrapper">
-                <div class="feature-toggle">
-                    <input type="checkbox" id="enableSlowDisplayTextCheckbox">
-                    <label for="enableSlowDisplayTextCheckbox">形式</label>
-                </div>
-                <div class="speed-control" id="speedControlArea" style="display: none;">
-                    <label for="slowDisplayTextSpeedSlider">速度:</label>
-                    <input type="range" id="slowDisplayTextSpeedSlider" min="20" max="400" value="150" step="5">
-                    <span id="speedValueDisplay" class="speed-value">150ms</span>
-                </div>
-                <div class="feature-toggle">
-                    <input type="checkbox" id="enableHintCheckbox" checked> 
-                    <label for="enableHintCheckbox">ヒントを表示</label>
-                </div>
-                </div>
         </header>
 
-        <main>
-            <div id="quizArea" style="display:none;">
-                <p id="questionNumberText" class="question-meta"></p>
-                <p id="questionText" class="fade-in"></p>
-                <button id="stopSlowDisplayTextButton" style="display:none;" class="utility-button">押す!</button>
-                
-                <input type="text" id="answerInput" placeholder="よみがなで答えを入力">
-                <button id="submitAnswer">回答!</button>
+        <main id="quiz-area" class="quiz-content">
+            <div class="message-display-area">
+                <p id="message-text" class="message-bubble"></p>
             </div>
-
-            <div class="hint-area-container">
-                <button id="hintButton" class="utility-button">ヒント</button>
-                <p id="hintTextDisplay" class="hint-text"></p>
+            <div id="choices-area" class="choices-container">
+                </div>
+            <div class="feedback-action-area">
+                <p id="feedback-text" class="feedback-text"></p>
+                <button id="next-question-btn" class="action-button next-button" style="display:none;">
+                    <i class="fas fa-arrow-right"></i> 次の問題へ
+                </button>
             </div>
-
-            <div id="resultArea" style="display:none;">
-                <p id="resultText"></p>
-                <p id="correctAnswerText"></p>
-                <button id="disputeButton" style="display:none;">不服！これは正解だろ...</button>
-                <button id="nextQuestion">次の問題へ</button>
-            </div>
-
-            <p id="loadingMessage">クイズを読み込み中...</p>
-            <p id="errorMessage" class="error-message"></p>
-            <p id="quizEndMessage" style="display:none;">クイズ全問終了！暇人すぎだろ。</p>
         </main>
-        <div class="youtube-embed-wrapper">
-        <h2>【MV】CUTIE STREET「キューにストップできません！」</h2>
-        <div class="video-responsive-container">
-            <iframe 
-                src="https://www.youtube.com/embed/_gfwU-heIkA?autoplay=1&mute=1" 
-                title="YouTube video player - CUTIE STREET「キューにストップできません！」Music Video" 
-                frameborder="0" 
-                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" 
-                referrerpolicy="strict-origin-when-cross-origin" 
-                allowfullscreen>
-            </iframe>
-        </div>
+
+        <section id="result-area" class="result-display-area" style="display:none;">
+            <div class="result-card">
+                <h2 class="result-title">クイズ結果</h2>
+                <div id="result-icon-container" class="result-icon-container">
+                    </div>
+                <p id="result-rank-title" class="result-rank-title"></p>
+                <div class="final-score-container">
+                    <span class="score-label-final">SCORE</span>
+                    <span id="final-score-value" class="final-score-value">0</span>
+                    <span class="total-questions-final">/ <span id="total-questions-on-result">10</span></span>
+                </div>
+                <p id="result-message" class="result-message"></p>
+                <button id="restart-btn" class="action-button restart-button">
+                    <i class="fas fa-redo"></i> もう一度挑戦！
+                </button>
+            </div>
+        </section>
+
+        <footer class="app-footer">
+            <p>&copy; <span id="current-year"></span> 誰でしょうクイズ ULTIMATE</p>
+        </footer>
     </div>
+    <canvas id="confetti-canvas" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 9999;"></canvas>
+
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js"></script>
     <script src="script.js"></script>
 </body>
 </html>
